@@ -1,0 +1,493 @@
+from __future__ import annotations
+import csv
+from dataclasses import dataclass, field
+from datetime import time
+from enum import Enum
+from typing import Any, Callable, TypeAlias
+
+from ortools.constraint_solver import pywrapcp, routing_enums_pb2
+
+FSS = routing_enums_pb2.FirstSolutionStrategy
+LSM = routing_enums_pb2.LocalSearchMetaheuristic
+ADDRESS_FILE = "data/distance_matrix.csv"
+PACKAGE_FILE = "data/package_details.csv"
+MILEAGE_SCALE_FACTOR = 10
+SECONDS_PER_HOUR = 3600
+SECONDS_PER_DAY = SECONDS_PER_HOUR * 24
+
+OrToolsEnum: TypeAlias = int
+AddressDict: TypeAlias = dict[str, "Address"]
+AddressMap: TypeAlias = dict[str, float]
+VehicleDict: TypeAlias = dict[int, "Vehicle"]
+PackageDict: TypeAlias = dict[int, "Package"]
+CsvRow: TypeAlias = dict[str, str]
+
+
+@dataclass
+class Address:
+    street: str
+    city: str
+    state: str
+    zip_code: str
+    distance_map_miles: AddressMap
+
+    @classmethod
+    def from_csv(cls) -> AddressDict:
+        with open(ADDRESS_FILE, newline="", encoding="utf-8-sig") as file:
+            return {
+                row["Street"]: cls(
+                    street=row.pop("Street"),
+                    city=row.pop("City"),
+                    state=row.pop("State"),
+                    zip_code=row.pop("Zip Code"),
+                    distance_map_miles={k: float(v) for k, v in row.items()},
+                )
+                for row in csv.DictReader(file)
+            }
+
+
+@dataclass
+class TravelCostMap:
+    cost_map: dict[str, dict[str, int]]
+
+    @classmethod
+    def create_from_addresses_with_transformer(
+        cls, addresses: AddressDict, transform: Callable[[float], int]
+    ) -> TravelCostMap:
+        cost_map = {
+            from_address: {
+                to_address: transform(distance)
+                for to_address, distance in address.distance_map_miles.items()
+            }
+            for from_address, address in addresses.items()
+        }
+        return cls(cost_map=cost_map)
+
+    @classmethod
+    def with_distance(cls, addresses: AddressDict) -> TravelCostMap:
+        return cls.create_from_addresses_with_transformer(
+            addresses, lambda distance: int(distance * MILEAGE_SCALE_FACTOR)
+        )
+
+    @classmethod
+    def with_duration(cls, addresses: AddressDict, speed_mph: float) -> TravelCostMap:
+        return cls.create_from_addresses_with_transformer(
+            addresses,
+            lambda distance: int(distance / speed_mph * SECONDS_PER_HOUR),
+        )
+
+
+@dataclass
+class Vehicle:
+    id: int
+    speed_mph: float
+    package_capacity: int
+    duration_map: TravelCostMap
+
+    @classmethod
+    def with_shared_attributes(
+        cls,
+        vehicle_count: int,
+        speed_mph: float,
+        package_capacity: int,
+        duration_map: TravelCostMap,
+    ) -> VehicleDict:
+        return {
+            vehicle_id: cls(
+                id=vehicle_id,
+                speed_mph=speed_mph,
+                package_capacity=package_capacity,
+                duration_map=duration_map,
+            )
+            for vehicle_id in range(1, vehicle_count + 1)
+        }
+
+    @property
+    def index(self) -> int:
+        """OR-Tools uses 0-based indexing for all vehicle references."""
+        return self.id - 1
+
+
+@dataclass
+class RoutingTime:
+    _total_seconds: int
+
+    def __str__(self):
+        return self.time.strftime("%H:%M:%S %p")
+
+    @classmethod
+    def from_time(cls, t: time) -> RoutingTime:
+        total_seconds = t.hour * SECONDS_PER_HOUR + t.minute * 60 + t.second
+        return cls(total_seconds)
+
+    @classmethod
+    def from_seconds(cls, seconds: int) -> RoutingTime:
+        return cls(seconds % SECONDS_PER_DAY)
+
+    @classmethod
+    def from_isoformat(cls, value: str) -> RoutingTime | None:
+        try:
+            return cls.from_time(time.fromisoformat(value))
+        except (ValueError, TypeError):
+            return None
+
+    @property
+    def time(self) -> time:
+        hours = self._total_seconds // SECONDS_PER_HOUR
+        minutes = (self._total_seconds % SECONDS_PER_HOUR) // 60
+        seconds = self._total_seconds % 60
+        return time(hours, minutes, seconds)
+
+    @property
+    def seconds(self) -> int:
+        return self._total_seconds
+
+    def duration_until(self, other: RoutingTime) -> int:
+        return other._total_seconds - self._total_seconds
+
+    def duration_after(self, other: RoutingTime) -> int:
+        return self._total_seconds - other._total_seconds
+
+
+@dataclass
+class Package:
+    id: int
+    address: Address
+    weight_kg: float | None = None
+    shipping_availability: RoutingTime | None = None
+    delivery_deadline: RoutingTime | None = None
+    vehicle_requirement: Vehicle | None = None
+    bundled_packages: list[Package] = field(default_factory=list)
+
+    @classmethod
+    def from_csv(cls, addresses: AddressDict, vehicles: VehicleDict) -> PackageDict:
+        with open(PACKAGE_FILE, newline="", encoding="utf-8-sig") as file:
+            rows = list(csv.DictReader(file))
+            packages = {
+                int(row["id"]): cls.from_row(row, vehicles, addresses) for row in rows
+            }
+            for row in rows:
+                cls.add_bundled_packages(row, packages)
+        return packages
+
+    @classmethod
+    def from_row(
+        cls,
+        row: CsvRow,
+        vehicles: VehicleDict,
+        addresses: AddressDict,
+    ) -> Package:
+        vehicle_id = cls._convert_or_none(row["vehicle_requirement"], int)
+        return cls(
+            id=int(row["id"]),
+            address=addresses[row["address"].strip()],
+            weight_kg=cls._convert_or_none(row["weight_kg"], float),
+            shipping_availability=RoutingTime.from_isoformat(row["availability"]),
+            delivery_deadline=RoutingTime.from_isoformat(row["deadline"]),
+            vehicle_requirement=vehicles[vehicle_id] if vehicle_id else None,
+        )
+
+    @classmethod
+    def add_bundled_packages(cls, row: CsvRow, packages: PackageDict) -> None:
+        bundled_ids = [
+            cls._convert_or_none(bundled_id, int)
+            for bundled_id in row["linked_packages"].split(",")
+        ]
+        packages[int(row["id"])].bundled_packages.extend(
+            packages[bundled_id] for bundled_id in bundled_ids if bundled_id
+        )
+
+    @staticmethod
+    def _convert_or_none(value: Any, convert_func: Callable[[str], Any]) -> Any | None:
+        try:
+            return convert_func(value.strip())
+        except (ValueError, TypeError, AttributeError):
+            return None
+
+    @staticmethod
+    def _find_node_index(package: Package, nodes: list[Node], kind: NodeKind) -> int:
+        for index, node in enumerate(nodes):
+            if node.package == package and node.kind == kind:
+                return index
+        raise ValueError(f"No node found with package {package} and kind {kind}.")
+
+    @property
+    def required_vehicle_index(self) -> int | None:
+        return self.vehicle_requirement.id - 1 if self.vehicle_requirement else None
+
+    def pickup_node_index(self, nodes: list[Node]) -> int:
+        return self._find_node_index(self, nodes, NodeKind.PICKUP)
+
+    def delivery_node_index(self, nodes: list[Node]) -> int:
+        return self._find_node_index(self, nodes, NodeKind.DELIVERY)
+
+
+class NodeKind(Enum):
+    ORIGIN = ("Route Start/End", 0)
+    PICKUP = ("Pickup", 1)
+    DELIVERY = ("Delivery", -1)
+
+    def __init__(self, description: str, capacity_impact: int):
+        self.description = description
+        self.capacity_impact = capacity_impact
+
+
+@dataclass
+class Node:
+    kind: NodeKind
+    address: str
+    package: Package | None = None
+    origin_id = 0
+
+    @classmethod
+    def from_packages(cls, packages: PackageDict) -> list[Node]:
+        nodes: list[Node] = [cls(NodeKind.ORIGIN, "Depot")]
+        for package in packages.values():
+            nodes.append(cls(NodeKind.PICKUP, "Depot", package))
+            nodes.append(cls(NodeKind.DELIVERY, package.address.street, package))
+        return nodes
+
+
+@dataclass
+class Constraints:
+    vehicle_capacities: bool = True
+    shipping_availability: bool = True
+    delivery_deadline: bool = True
+    vehicle_requirement: bool = True
+    bundled_packages: bool = True
+
+
+class OptimizationType(Enum):
+    MILEAGE = "Mileage"
+    TIME = "Time"
+
+
+@dataclass
+class RoutingScenario:
+    day_start: RoutingTime = field(
+        default_factory=lambda: RoutingTime.from_time(time(8))
+    )
+    day_end: RoutingTime = field(
+        default_factory=lambda: RoutingTime.from_time(time(18))
+    )
+    vehicle_count: int = 2
+    vehicle_speed_mph: float = 18.0
+    vehicle_capacity: int = 16
+    constraints: Constraints = field(default_factory=lambda: Constraints())
+    optimization: OptimizationType = OptimizationType.MILEAGE
+
+
+@dataclass
+class SearchSettings:
+    max_mileage_per_vehicle: int = 100
+    distance_span_cost_coefficient: int = 0
+    base_penalty: int = 1000
+    penalty_scale_req_vehicle: int = 3
+    penalty_scale_pickups: int = 2
+    use_full_propagation: bool = True
+    use_search_logging: bool = True
+    first_solution_strategy: OrToolsEnum = FSS.LOCAL_CHEAPEST_INSERTION
+    local_search_metaheuristic: OrToolsEnum = LSM.GUIDED_LOCAL_SEARCH
+    solver_time_limit_seconds: int | None = 600
+    solver_solution_limit: int | None = 10000
+
+
+@dataclass
+class DataModel:
+    addresses: AddressDict
+    distance_map: TravelCostMap
+    vehicles: VehicleDict
+    packages: PackageDict
+    nodes: list[Node]
+
+    @classmethod
+    def with_defaults(cls) -> DataModel:
+        scenario = RoutingScenario()
+        addresses = Address.from_csv()
+        vehicles = Vehicle.with_shared_attributes(
+            scenario.vehicle_count,
+            scenario.vehicle_speed_mph,
+            scenario.vehicle_capacity,
+            TravelCostMap.with_duration(addresses, scenario.vehicle_speed_mph),
+        )
+        packages = Package.from_csv(addresses, vehicles)
+        return cls(
+            addresses=addresses,
+            distance_map=TravelCostMap.with_distance(addresses),
+            vehicles=vehicles,
+            packages=packages,
+            nodes=Node.from_packages(packages),
+        )
+
+
+@dataclass
+class Stop:
+    node: Node
+    vehicle_load: int
+    visit_time: RoutingTime
+    mileage: float
+
+
+@dataclass
+class Route:
+    vehicle: Vehicle
+    stops: list[Stop]
+
+    @classmethod
+    def create_route(
+        cls,
+        vehicle: Vehicle,
+        nodes: list[Node],
+        day_start: RoutingTime,
+        manager: pywrapcp.RoutingIndexManager,
+        router: pywrapcp.RoutingModel,
+        assignments: pywrapcp.Assignment,
+    ) -> Route:
+        stops = []
+        vehicle_load = 0
+        mileage = 0.0
+        index = router.Start(vehicle.index)
+        time_dimension = router.GetDimensionOrDie("Time")
+
+        def create_stop(index: int, previous_index: int | None) -> Stop:
+            nonlocal vehicle_load, mileage
+            node = nodes[manager.IndexToNode(index)]
+            vehicle_load += node.kind.capacity_impact
+            route_seconds = assignments.Min(time_dimension.CumulVar(index))
+            visit_time = RoutingTime.from_seconds(day_start.seconds + route_seconds)
+            if previous_index:
+                mileage += (
+                    router.GetArcCostForVehicle(previous_index, index, vehicle.index)
+                    / MILEAGE_SCALE_FACTOR
+                )
+            return Stop(node, vehicle_load, visit_time, mileage)
+
+        previous_index = None
+        while not router.IsEnd(index):
+            stops.append(create_stop(index, previous_index))
+            previous_index = index
+            index = assignments.Value(router.NextVar(index))
+        stops.append(create_stop(index, previous_index))
+
+        return cls(vehicle, stops)
+
+    @property
+    def delivered_packages(self) -> PackageDict:
+        return {
+            stop.node.package.id: stop.node.package
+            for stop in self.stops
+            if stop.node.kind == NodeKind.DELIVERY and stop.node.package
+        }
+
+    @property
+    def mileage(self) -> float:
+        return self.stops[-1].mileage if self.stops else 0.0
+
+    @property
+    def end_time(self) -> RoutingTime | None:
+        return self.stops[-1].visit_time if self.stops else None
+
+
+@dataclass
+class Solution:
+    data: DataModel
+    scenario: RoutingScenario
+    settings: SearchSettings
+    routes: list[Route]
+
+    @classmethod
+    def save_solution(
+        cls,
+        data: DataModel,
+        scenario: RoutingScenario,
+        settings: SearchSettings,
+        manager: pywrapcp.RoutingIndexManager,
+        router: pywrapcp.RoutingModel,
+        assignments: pywrapcp.Assignment,
+    ) -> Solution:
+        return cls(
+            data=data,
+            scenario=scenario,
+            settings=settings,
+            routes=[
+                Route.create_route(
+                    vehicle,
+                    data.nodes,
+                    scenario.day_start,
+                    manager,
+                    router,
+                    assignments,
+                )
+                for vehicle in data.vehicles.values()
+            ],
+        )
+
+    @property
+    def mileage(self) -> float:
+        return sum(route.mileage for route in self.routes)
+
+    @property
+    def end_time(self) -> RoutingTime | None:
+        route_times = [
+            route.end_time.seconds for route in self.routes if route.end_time
+        ]
+        if route_times:
+            max_time = max(route_times)
+            return RoutingTime.from_seconds(max_time)
+        return None
+
+    @property
+    def delivered_packages(self) -> PackageDict:
+        return {
+            package_id: package
+            for route in self.routes
+            for package_id, package in route.delivered_packages.items()
+        }
+
+    @property
+    def missed_packages(self) -> PackageDict:
+        return {
+            package_id: package
+            for package_id, package in self.data.packages.items()
+            if package_id not in self.delivered_packages
+        }
+
+    @property
+    def delivered_packages_count(self) -> int:
+        return len(self.delivered_packages)
+
+    @property
+    def missed_packages_count(self) -> int:
+        return len(self.missed_packages)
+
+    @property
+    def delivery_success_rate(self) -> float:
+        return self.delivered_packages_count / (
+            self.delivered_packages_count + self.missed_packages_count
+        )
+
+    @property
+    def delivery_percentage(self) -> str:
+        return f"{round(self.delivery_success_rate * 100, 2)}%"
+
+    def print_solution(self):
+        for route in self.routes:
+            print(f"\nRoute for Vehicle {route.vehicle.id}:\n")
+            for stop in route.stops:
+                package_id = stop.node.package.id if stop.node.package else None
+                output = f"Package: {package_id}\t"
+                output += f"Step: {stop.node.kind.description}\t"
+                output += f"Address: {stop.node.address}\t"
+                output += f"Load: {stop.vehicle_load}\t"
+                output += f"Mileage: {round(stop.mileage, 1)}\t"
+                output += f"Time: {stop.visit_time}\t"
+                print(output)
+        print(f"\nTotal mileage: {round(self.mileage, 1)}")
+        print(f"Packages delivered: {self.delivered_packages_count}")
+        print(f"Packages missed: {self.missed_packages_count}")
+        print(
+            f"Missed packages: {
+                [missed_package.id for missed_package in self.missed_packages.values()]
+            }"
+        )
+        print(f"Delivery percentage: {self.delivery_percentage}")
