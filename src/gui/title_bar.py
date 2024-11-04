@@ -4,67 +4,83 @@ import flet as ft
 
 
 class TitleBar(ft.Row):
+
     def __init__(
         self,
         minimize_callback: Callable[[None], None],
         maximize_callback: Callable[[ft.ControlEvent], None],
-        exit_callback: Callable[[None], None],
+        close_callback: Callable[[None], None],
     ) -> None:
+
         super().__init__()
-        self.windows_buttons = self._create_windows_buttons(
+
+        self.window_drag_area = ft.WindowDragArea(
+            content=ft.Container(),
+            expand=True,
+            height=30,
+        )
+        self.caption_buttons = self._create_caption_buttons(
             minimize_callback,
             maximize_callback,
-            exit_callback,
+            close_callback,
         )
-        self.drag_area = ft.WindowDragArea(
-            content=ft.Container(
-                height=30,
-            ),
-            expand=True,
-        )
-        self.controls = [
-            self.drag_area,
-            self.windows_buttons,
-        ]
-        self.vertical_alignment = ft.CrossAxisAlignment.START
-        self.spacing = 0
 
-    def _create_windows_buttons(
+        self.controls = [
+            self.window_drag_area,
+            self.caption_buttons,
+        ]
+
+        self.spacing = 0
+        self.vertical_alignment = ft.CrossAxisAlignment.START
+
+    def _create_caption_buttons(
         self,
         minimize_callback: Callable[[None], None],
         maximize_callback: Callable[[ft.ControlEvent], None],
         exit_callback: Callable[[None], None],
     ) -> ft.Container:
+
         self.minimize_button = ft.IconButton(
-            icon=ft.icons.MINIMIZE_ROUNDED,
-            icon_size=20,
+            icon=ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+            icon_size=18,
+            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
             tooltip="Minimize",
             on_click=minimize_callback,
         )
         self.maximize_button = ft.IconButton(
-            icon=ft.icons.OPEN_IN_FULL_ROUNDED,
-            icon_size=20,
+            icon=ft.icons.CROP_SQUARE_ROUNDED,
+            icon_size=18,
+            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
             tooltip="Maximize",
             on_click=maximize_callback,
         )
         self.exit_button = ft.IconButton(
             icon=ft.icons.CLOSE_ROUNDED,
-            icon_size=20,
-            tooltip="Exit",
+            icon_size=18,
+            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
+            tooltip="Close",
             on_click=exit_callback,
-            hover_color=ft.colors.ERROR_CONTAINER,
-            highlight_color=ft.colors.ERROR,
+
             style=ft.ButtonStyle(
+                color={
+                    ft.ControlState.PRESSED: ft.colors.ERROR,
+                    ft.ControlState.HOVERED: ft.colors.ERROR_CONTAINER,
+                },
                 icon_color={
                     ft.ControlState.HOVERED: ft.colors.ON_ERROR_CONTAINER,
                 },
             ),
         )
+
         return ft.Container(
             content=ft.Row(
-                controls=[self.minimize_button, self.maximize_button, self.exit_button],
+                controls=[
+                    self.minimize_button,
+                    self.maximize_button,
+                    self.exit_button,
+                ],
                 spacing=0,
             ),
-            padding=ft.padding.only(0, 8, 8, 8),
+            padding=ft.padding.all(5),
             visible=False,
         )

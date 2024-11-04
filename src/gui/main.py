@@ -5,53 +5,121 @@ from page_view import PageView
 
 def main(page: ft.Page) -> None:
 
-    setup_page = PageView(
+    setup_view = PageView(
         name="Setup",
         navigation_icon=ft.icons.DESIGN_SERVICES_OUTLINED,
-        navigation_icon_selected=ft.icons.DESIGN_SERVICES_ROUNDED,
-        floating_action_icon=ft.icons.AUTO_AWESOME_ROUNDED,
-        floating_action_text="Plan routes",
+        selected_navigation_icon=ft.icons.DESIGN_SERVICES_ROUNDED,
     )
-    packages_page = PageView(
+    package_view = PageView(
         "Packages",
         navigation_icon=ft.icons.INVENTORY_2_OUTLINED,
-        navigation_icon_selected=ft.icons.INVENTORY_2_ROUNDED,
-        floating_action_icon=ft.icons.INVENTORY_2_ROUNDED,
-        floating_action_text="Add package",
+        selected_navigation_icon=ft.icons.INVENTORY_2_ROUNDED,
     )
-    vehicles_page = PageView(
+    vehicle_view = PageView(
         "Vehicles",
         navigation_icon=ft.icons.LOCAL_SHIPPING_OUTLINED,
-        navigation_icon_selected=ft.icons.LOCAL_SHIPPING_ROUNDED,
-        floating_action_icon=ft.icons.LOCAL_SHIPPING_ROUNDED,
-        floating_action_text="Add vehicle",
+        selected_navigation_icon=ft.icons.LOCAL_SHIPPING_ROUNDED,
     )
-    places_page = PageView(
-        "Locations",
+    address_view = PageView(
+        "Addresses",
         navigation_icon=ft.icons.LOCATION_ON_OUTLINED,
-        navigation_icon_selected=ft.icons.LOCATION_ON,
+        selected_navigation_icon=ft.icons.LOCATION_ON,
     )
-    routes_page = PageView(
+    route_view = PageView(
         "Routes",
         navigation_icon=ft.icons.ROUTE_OUTLINED,
-        navigation_icon_selected=ft.icons.ROUTE_ROUNDED,
+        selected_navigation_icon=ft.icons.ROUTE_ROUNDED,
     )
-    about_page = PageView(
+    about_view = PageView(
         "About",
         navigation_icon=ft.icons.INFO_OUTLINE_ROUNDED,
-        navigation_icon_selected=ft.icons.INFO_ROUNDED,
+        selected_navigation_icon=ft.icons.INFO_ROUNDED,
     )
 
-    page_views = [
-        setup_page,
-        packages_page,
-        vehicles_page,
-        places_page,
-        routes_page,
-        about_page,
+    views = [
+        setup_view,
+        package_view,
+        vehicle_view,
+        address_view,
+        route_view,
+        about_view,
     ]
 
-    AppWindow(page, page_views)
+    AppWindow(page, views)
+
+    setup_view.scrolling_content.controls.extend(
+        [
+            ft.Card(
+                content=ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.ListTile(
+                                leading=ft.Icon(ft.icons.SCIENCE_ROUNDED),
+                                title=ft.Text("Search settings"),
+                                subtitle=ft.Text(
+                                    "Choose an optimization strategy from several algorithms."
+                                ),
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Dropdown(
+                                        label="Outcome preference",
+                                        options=[
+                                            ft.dropdown.Option("Optimize for total mileage"),
+                                            ft.dropdown.Option("Optimize for total time"),
+                                        ], padding=10
+                                    ),
+                                    ft.Dropdown(
+                                        label="First solution strategy",
+                                        options=[
+                                            ft.dropdown.Option("Cheapest cost insertion"),
+                                            ft.dropdown.Option("Parallel cheapest insertion"),
+                                        ], padding=10
+                                    ),
+                                    ft.Dropdown(
+                                        label="Local search metaheuristic",
+                                        options=[
+                                            ft.dropdown.Option("Local guided search"),
+                                            ft.dropdown.Option("Simulated annealing"),
+                                        ], padding=10
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                    padding=10,
+                ), margin=10, color=ft.colors.TERTIARY_CONTAINER, elevation=5,
+            ),
+            ft.Card(
+                content=ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.ListTile(
+                                leading=ft.Icon(ft.icons.DISPLAY_SETTINGS_ROUNDED),
+                                title=ft.Text("Scenario and constraints"),
+                                subtitle=ft.Text(
+                                    "Choose which delivery constraints to apply in the search."
+                                ),
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Checkbox("Testing, testing, 234"),
+                                    ft.Checkbox("Testing, testing, 234"),
+                                    ft.Checkbox("Testing, testing, 234"),
+                                    ft.Checkbox("Testing, testing, 234"),
+                                    ft.Checkbox("Testing, testing, 234"),
+                                ],
+                            ),
+                        ],
+                    ),
+                    padding=10,
+                ), margin=10, color=ft.colors.TERTIARY_CONTAINER, elevation=5,
+            ),
+        ],
+    )
+
+    package_view.update_badge_value(40)
+    address_view.update_badge_value(27)
 
     page.update()
 
