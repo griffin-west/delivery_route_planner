@@ -22,8 +22,7 @@ class AppWindow:
         self.navigation_pane = NavigationPane(
             views=self.views,
             navigation_callback=self._switch_view,
-            color_scheme_callback=lambda _: self._randomize_color_scheme(),
-            light_switch_callback=self._toggle_light_switch,
+            dark_mode_callback=self._toggle_light_switch,
         )
         self.view_switch = ft.AnimatedSwitcher(
             content=self.views[0],
@@ -34,9 +33,9 @@ class AppWindow:
         self.view_pane = ft.Container(
             content=self.view_switch,
             bgcolor=ft.colors.SURFACE,
-            margin=ft.margin.only(0, 0, 30, 30),
+            margin=ft.margin.only(0, 0, 24, 24),
             padding=ft.padding.symmetric(0,30),
-            border_radius=10,
+            border_radius=20,
             expand=True,
         )
 
@@ -80,7 +79,9 @@ class AppWindow:
     def _setup_window(self) -> None:
         self.page.window.center()
         self.page.window.width = 800
-        self.page.window.height = 600
+        self.page.window.height = 800
+        self.page.window.min_width = 500
+        self.page.window.min_height = 500
         self.page.window.shadow = True
         self.page.window.prevent_close = True
         self.page.window.title_bar_hidden = True
@@ -89,14 +90,12 @@ class AppWindow:
         self.page.padding = 0
         self.page.spacing = 0
         self.page.title = "Delivery Route Planner"
-        self.page.bgcolor = ft.colors.SECONDARY_CONTAINER
+        self.page.bgcolor = ft.colors.ON_INVERSE_SURFACE
         self.page.theme_mode = ft.ThemeMode.LIGHT
-        self.page.theme = ft.Theme(color_scheme_seed=ft.colors.random_color())
-
         if self.page.platform == ft.PagePlatform.WINDOWS:
             self.page.window.title_bar_buttons_hidden = True
             self.title_bar.caption_buttons.visible = True
-            self.title_bar.window_drag_area.height = 40
+            self.title_bar.window_drag_area.height = 48
 
     def _window_event_handler(self, event: ft.WindowEvent) -> None:
         if event.type == ft.WindowEventType.CLOSE:
@@ -114,19 +113,22 @@ class AppWindow:
     def _toggle_light_switch(self, event: ft.ControlEvent) -> None:
         if self.page.theme_mode == ft.ThemeMode.LIGHT:
             self.page.theme_mode = ft.ThemeMode.DARK
-            event.control.icon = ft.icons.LIGHT_MODE_ROUNDED
+            event.control.icon = ft.icons.LIGHT_MODE_OUTLINED
             event.control.tooltip = "Light mode"
         else:
             self.page.theme_mode = ft.ThemeMode.LIGHT
-            event.control.icon = ft.icons.DARK_MODE_ROUNDED
+            event.control.icon = ft.icons.DARK_MODE_OUTLINED
             event.control.tooltip = "Dark mode"
-        self.page.update()
-
-    def _randomize_color_scheme(self) -> None:
-        self.page.theme = ft.Theme(color_scheme_seed=ft.colors.random_color())
         self.page.update()
 
     def _switch_view(self, event: ft.ControlEvent) -> None:
         view_index = event.control.selected_index
         self.view_switch.content = self.views[view_index]
         self.view_switch.update()
+        self._randomize_color_scheme()
+
+    def _randomize_color_scheme(self) -> None:
+        self.page.theme = ft.Theme(color_scheme_seed=ft.colors.random_color())
+        self.page.update()
+
+

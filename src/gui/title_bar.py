@@ -41,35 +41,25 @@ class TitleBar(ft.Row):
     ) -> ft.Container:
 
         self.minimize_button = ft.IconButton(
-            icon=ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+            icon=ft.icons.KEYBOARD_ARROW_DOWN,
             icon_size=18,
-            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
             tooltip="Minimize",
             on_click=minimize_callback,
+            icon_color=ft.colors.ON_SURFACE,
         )
         self.maximize_button = ft.IconButton(
-            icon=ft.icons.CROP_SQUARE_ROUNDED,
+            icon=ft.icons.CROP_SQUARE,
             icon_size=18,
-            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
             tooltip="Maximize",
             on_click=maximize_callback,
+            icon_color=ft.colors.ON_SURFACE,
         )
         self.exit_button = ft.IconButton(
-            icon=ft.icons.CLOSE_ROUNDED,
+            icon=ft.icons.CLOSE,
             icon_size=18,
-            icon_color=ft.colors.ON_PRIMARY_CONTAINER,
             tooltip="Close",
             on_click=exit_callback,
-
-            style=ft.ButtonStyle(
-                color={
-                    ft.ControlState.PRESSED: ft.colors.ERROR,
-                    ft.ControlState.HOVERED: ft.colors.ERROR_CONTAINER,
-                },
-                icon_color={
-                    ft.ControlState.HOVERED: ft.colors.ON_ERROR_CONTAINER,
-                },
-            ),
+            icon_color=ft.colors.ON_SURFACE,
         )
 
         return ft.Container(

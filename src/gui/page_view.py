@@ -14,18 +14,16 @@ class PageView(ft.Column):
         super().__init__()
 
         self.name = name
-        self.navigation_icon = ft.Icon(navigation_icon, color=ft.colors.ON_PRIMARY_CONTAINER)
-        self.selected_navigation_icon = ft.Icon(selected_navigation_icon, color=ft.colors.ON_PRIMARY_CONTAINER)
-        self.navigation_rail_destination = self._create_navigation_rail_destination()
+        self.navigation_icon = ft.Icon(navigation_icon)
+        self.selected_navigation_icon = ft.Icon(selected_navigation_icon)
+        self.nav_rail_button = self._create_navigation_rail_destination()
 
-        self.header = ft.Container(
-            ft.Text(value=self.name, size=28),
-            padding=ft.padding.only(0, 20, 0, 0),
-        )
+        self.header = ft.Text(value=self.name, style=ft.TextThemeStyle.HEADLINE_SMALL)
 
         self.scrolling_content = ft.ListView(expand=True)
 
         self.controls = [
+            ft.Container(height=20),
             self.header,
             self.scrolling_content,
         ]
@@ -48,12 +46,12 @@ class PageView(ft.Column):
         )
 
     def update_badge_value(self, value: int) -> None:
-        self.navigation_rail_destination.icon_content = ft.Badge(
+        self.nav_rail_button.icon_content = ft.Badge(
             self.navigation_icon,
             text=str(value),
             label_visible=(value > 0),
         )
-        self.navigation_rail_destination.selected_icon_content = ft.Badge(
+        self.nav_rail_button.selected_icon_content = ft.Badge(
             self.selected_navigation_icon,
             text=str(value),
             label_visible=(value > 0),

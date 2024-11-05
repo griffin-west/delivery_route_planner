@@ -7,18 +7,18 @@ def main(page: ft.Page) -> None:
 
     setup_view = PageView(
         name="Setup",
-        navigation_icon=ft.icons.DESIGN_SERVICES_OUTLINED,
-        selected_navigation_icon=ft.icons.DESIGN_SERVICES_ROUNDED,
+        navigation_icon=ft.icons.DISPLAY_SETTINGS_OUTLINED,
+        selected_navigation_icon=ft.icons.DISPLAY_SETTINGS,
     )
     package_view = PageView(
         "Packages",
         navigation_icon=ft.icons.INVENTORY_2_OUTLINED,
-        selected_navigation_icon=ft.icons.INVENTORY_2_ROUNDED,
+        selected_navigation_icon=ft.icons.INVENTORY_2,
     )
     vehicle_view = PageView(
         "Vehicles",
         navigation_icon=ft.icons.LOCAL_SHIPPING_OUTLINED,
-        selected_navigation_icon=ft.icons.LOCAL_SHIPPING_ROUNDED,
+        selected_navigation_icon=ft.icons.LOCAL_SHIPPING,
     )
     address_view = PageView(
         "Addresses",
@@ -28,12 +28,7 @@ def main(page: ft.Page) -> None:
     route_view = PageView(
         "Routes",
         navigation_icon=ft.icons.ROUTE_OUTLINED,
-        selected_navigation_icon=ft.icons.ROUTE_ROUNDED,
-    )
-    about_view = PageView(
-        "About",
-        navigation_icon=ft.icons.INFO_OUTLINE_ROUNDED,
-        selected_navigation_icon=ft.icons.INFO_ROUNDED,
+        selected_navigation_icon=ft.icons.ROUTE,
     )
 
     views = [
@@ -42,84 +37,65 @@ def main(page: ft.Page) -> None:
         vehicle_view,
         address_view,
         route_view,
-        about_view,
     ]
 
     AppWindow(page, views)
 
+    route_view.nav_rail_button.disabled = True
+
     setup_view.scrolling_content.controls.extend(
         [
             ft.Card(
-                content=ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.ListTile(
-                                leading=ft.Icon(ft.icons.SCIENCE_ROUNDED),
-                                title=ft.Text("Search settings"),
-                                subtitle=ft.Text(
-                                    "Choose an optimization strategy from several algorithms."
+                content = ft.Container(ft.Column(
+                    spacing=10,
+                    controls=[
+                        ft.ListTile(
+                            leading=ft.Icon(ft.icons.CHECKLIST),
+                            title=ft.Text("Scenario constraints"),
+                            subtitle=ft.Text(
+                                "Select the requirements that must be included in the routing plans."
+                            ),
+                        ),
+                        ft.Row(
+                            [
+                                ft.Chip(
+                                    label=ft.Text("Delivery deadlines"),
+                                    on_select=lambda _: page.update(),
                                 ),
-                            ),
-                            ft.Column(
-                                [
-                                    ft.Dropdown(
-                                        label="Outcome preference",
-                                        options=[
-                                            ft.dropdown.Option("Optimize for total mileage"),
-                                            ft.dropdown.Option("Optimize for total time"),
-                                        ], padding=10
-                                    ),
-                                    ft.Dropdown(
-                                        label="First solution strategy",
-                                        options=[
-                                            ft.dropdown.Option("Cheapest cost insertion"),
-                                            ft.dropdown.Option("Parallel cheapest insertion"),
-                                        ], padding=10
-                                    ),
-                                    ft.Dropdown(
-                                        label="Local search metaheuristic",
-                                        options=[
-                                            ft.dropdown.Option("Local guided search"),
-                                            ft.dropdown.Option("Simulated annealing"),
-                                        ], padding=10
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
-                    padding=10,
-                ), margin=10, color=ft.colors.TERTIARY_CONTAINER, elevation=5,
-            ),
-            ft.Card(
-                content=ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.ListTile(
-                                leading=ft.Icon(ft.icons.DISPLAY_SETTINGS_ROUNDED),
-                                title=ft.Text("Scenario and constraints"),
-                                subtitle=ft.Text(
-                                    "Choose which delivery constraints to apply in the search."
+                                ft.Chip(
+                                    label=ft.Text("Shipping delays"),
+                                    on_select=lambda _: page.update(),
                                 ),
-                            ),
-                            ft.Column(
-                                [
-                                    ft.Checkbox("Testing, testing, 234"),
-                                    ft.Checkbox("Testing, testing, 234"),
-                                    ft.Checkbox("Testing, testing, 234"),
-                                    ft.Checkbox("Testing, testing, 234"),
-                                    ft.Checkbox("Testing, testing, 234"),
-                                ],
-                            ),
-                        ],
-                    ),
-                    padding=10,
-                ), margin=10, color=ft.colors.TERTIARY_CONTAINER, elevation=5,
+                                ft.Chip(
+                                    label=ft.Text("Vehicle capacities"),
+                                    on_select=lambda _: page.update(),
+                                ),
+                                ft.Chip(
+                                    label=ft.Text("Vehicle requirements"),
+                                    on_select=lambda _: page.update(),
+                                ),
+                                ft.Chip(
+                                    label=ft.Text("Package bundles"),
+                                    on_select=lambda _: page.update(),
+                                ),
+                            ],
+                            wrap=True,
+                        ),
+                        ft.SegmentedButton(
+                            [
+                                ft.Segment(value="Mileage", label=ft.Text("Mileage")),
+                                ft.Segment(value="Time", label=ft.Text("Time")),
+                            ],
+                            selected={"Mileage"},
+                            width=250,
+                        ),
+                        ft.Slider(min=0, max=100),
+                    ],
+                ), padding=20),
+                elevation=0,
             ),
         ],
     )
-
-    package_view.update_badge_value(40)
-    address_view.update_badge_value(27)
 
     page.update()
 
