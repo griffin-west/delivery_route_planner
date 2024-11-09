@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import csv
 from dataclasses import dataclass, field
 from datetime import time
 from enum import Enum
+from pathlib import Path
 from typing import Any, Callable, TypeAlias
 
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
@@ -33,7 +35,7 @@ class Address:
 
     @classmethod
     def from_csv(cls) -> AddressDict:
-        with open(ADDRESS_FILE, newline="", encoding="utf-8-sig") as file:
+        with Path(ADDRESS_FILE).open(newline="", encoding="utf-8-sig") as file:
             return {
                 row["Street"]: cls(
                     street=row.pop("Street"),
@@ -52,7 +54,9 @@ class TravelCostMap:
 
     @classmethod
     def create_from_addresses_with_transformer(
-        cls, addresses: AddressDict, transform: Callable[[float], int]
+        cls,
+        addresses: AddressDict,
+        transform: Callable[[float], int],
     ) -> TravelCostMap:
         cost_map = {
             from_address: {
@@ -66,7 +70,8 @@ class TravelCostMap:
     @classmethod
     def with_distance(cls, addresses: AddressDict) -> TravelCostMap:
         return cls.create_from_addresses_with_transformer(
-            addresses, lambda distance: int(distance * MILEAGE_SCALE_FACTOR)
+            addresses,
+            lambda distance: int(distance * MILEAGE_SCALE_FACTOR),
         )
 
     @classmethod
@@ -112,7 +117,7 @@ class Vehicle:
 class RoutingTime:
     _total_seconds: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.time.strftime("%H:%M:%S %p")
 
     @classmethod
@@ -143,10 +148,10 @@ class RoutingTime:
         return self._total_seconds
 
     def duration_until(self, other: RoutingTime) -> int:
-        return other._total_seconds - self._total_seconds
+        return other.seconds - self.seconds
 
     def duration_after(self, other: RoutingTime) -> int:
-        return self._total_seconds - other._total_seconds
+        return self.seconds - other.seconds
 
 
 @dataclass
@@ -161,7 +166,7 @@ class Package:
 
     @classmethod
     def from_csv(cls, addresses: AddressDict, vehicles: VehicleDict) -> PackageDict:
-        with open(PACKAGE_FILE, newline="", encoding="utf-8-sig") as file:
+        with Path(PACKAGE_FILE).open(newline="", encoding="utf-8-sig") as file:
             rows = list(csv.DictReader(file))
             packages = {
                 int(row["id"]): cls.from_row(row, vehicles, addresses) for row in rows
@@ -205,20 +210,24 @@ class Package:
             return None
 
     @staticmethod
-    def _find_node_index(package: Package, nodes: list[Node], kind: NodeKind) -> int:
+    def _find_node_index(
+        package: Package,
+        nodes: list[Node],
+        kind: NodeKind,
+    ) -> int | None:
         for index, node in enumerate(nodes):
             if node.package == package and node.kind == kind:
                 return index
-        raise ValueError(f"No node found with package {package} and kind {kind}.")
+        return None
 
     @property
     def required_vehicle_index(self) -> int | None:
         return self.vehicle_requirement.id - 1 if self.vehicle_requirement else None
 
-    def pickup_node_index(self, nodes: list[Node]) -> int:
+    def pickup_node_index(self, nodes: list[Node]) -> int | None:
         return self._find_node_index(self, nodes, NodeKind.PICKUP)
 
-    def delivery_node_index(self, nodes: list[Node]) -> int:
+    def delivery_node_index(self, nodes: list[Node]) -> int | None:
         return self._find_node_index(self, nodes, NodeKind.DELIVERY)
 
 
@@ -227,7 +236,7 @@ class NodeKind(Enum):
     PICKUP = ("Pickup", 1)
     DELIVERY = ("Delivery", -1)
 
-    def __init__(self, description: str, capacity_impact: int):
+    def __init__(self, description: str, capacity_impact: int) -> None:
         self.description = description
         self.capacity_impact = capacity_impact
 
@@ -265,10 +274,10 @@ class OptimizationType(Enum):
 @dataclass
 class RoutingScenario:
     day_start: RoutingTime = field(
-        default_factory=lambda: RoutingTime.from_time(time(8))
+        default_factory=lambda: RoutingTime.from_time(time(8)),
     )
     day_end: RoutingTime = field(
-        default_factory=lambda: RoutingTime.from_time(time(18))
+        default_factory=lambda: RoutingTime.from_time(time(18)),
     )
     vehicle_count: int = 2
     vehicle_speed_mph: float = 18.0
@@ -469,25 +478,3 @@ class Solution:
     @property
     def delivery_percentage(self) -> str:
         return f"{round(self.delivery_success_rate * 100, 2)}%"
-
-    def print_solution(self):
-        for route in self.routes:
-            print(f"\nRoute for Vehicle {route.vehicle.id}:\n")
-            for stop in route.stops:
-                package_id = stop.node.package.id if stop.node.package else None
-                output = f"Package: {package_id}\t"
-                output += f"Step: {stop.node.kind.description}\t"
-                output += f"Address: {stop.node.address}\t"
-                output += f"Load: {stop.vehicle_load}\t"
-                output += f"Mileage: {round(stop.mileage, 1)}\t"
-                output += f"Time: {stop.visit_time}\t"
-                print(output)
-        print(f"\nTotal mileage: {round(self.mileage, 1)}")
-        print(f"Packages delivered: {self.delivered_packages_count}")
-        print(f"Packages missed: {self.missed_packages_count}")
-        print(
-            f"Missed packages: {
-                [missed_package.id for missed_package in self.missed_packages.values()]
-            }"
-        )
-        print(f"Delivery percentage: {self.delivery_percentage}")

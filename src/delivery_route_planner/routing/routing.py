@@ -1,5 +1,9 @@
+from __future__ import annotations
+
+from typing import Callable
+
+from models import models
 from ortools.constraint_solver import pywrapcp
-import src.models as models
 
 
 def solve_vehicle_routing_problem(
@@ -9,11 +13,13 @@ def solve_vehicle_routing_problem(
 ) -> models.Solution | None:
 
     manager = pywrapcp.RoutingIndexManager(
-        len(data.nodes), len(data.vehicles), models.Node.origin_id
+        len(data.nodes),
+        len(data.vehicles),
+        models.Node.origin_id,
     )
     router = pywrapcp.RoutingModel(manager)
 
-    def distance_callback(from_index, to_index) -> int:
+    def distance_callback(from_index: int, to_index: int) -> int:
         from_node = data.nodes[manager.IndexToNode(from_index)]
         to_node = data.nodes[manager.IndexToNode(to_index)]
         return data.distance_map.cost_map[from_node.address][to_node.address]
@@ -21,15 +27,15 @@ def solve_vehicle_routing_problem(
     distance_callback_index = router.RegisterTransitCallback(distance_callback)
     router.SetArcCostEvaluatorOfAllVehicles(distance_callback_index)
     router.AddDimension(
-        distance_callback_index,
-        0,
-        settings.max_mileage_per_vehicle * models.MILEAGE_SCALE_FACTOR,
-        True,
-        "Distance",
+        evaluator_index=distance_callback_index,
+        slack_max=0,
+        capacity=settings.max_mileage_per_vehicle * models.MILEAGE_SCALE_FACTOR,
+        fix_start_cumul_to_zero=True,
+        name="Distance",
     )
     distance_dimension = router.GetDimensionOrDie("Distance")
     distance_dimension.SetGlobalSpanCostCoefficient(
-        settings.distance_span_cost_coefficient
+        settings.distance_span_cost_coefficient,
     )
 
     day_duration = scenario.day_start.duration_until(scenario.day_end)
@@ -38,8 +44,10 @@ def solve_vehicle_routing_problem(
     for vehicle in data.vehicles.values():
         vehicle_travel_costs = vehicle.duration_map.cost_map
 
-        def time_callback_closure(vehicle_travel_costs):
-            def time_callback(from_index, to_index) -> int:
+        def time_callback_closure(
+            vehicle_travel_costs: dict[str, dict[str, int]],
+        ) -> Callable[[int, int], int]:
+            def time_callback(from_index: int, to_index: int) -> int:
                 from_node = data.nodes[manager.IndexToNode(from_index)]
                 to_node = data.nodes[manager.IndexToNode(to_index)]
                 return vehicle_travel_costs[from_node.address][to_node.address]
@@ -47,20 +55,24 @@ def solve_vehicle_routing_problem(
             return time_callback
 
         time_callback_indices.append(
-            router.RegisterTransitCallback(time_callback_closure(vehicle_travel_costs))
+            router.RegisterTransitCallback(time_callback_closure(vehicle_travel_costs)),
         )
     router.AddDimensionWithVehicleTransits(
-        time_callback_indices, day_duration, day_duration, False, "Time"
+        evaluator_indices=time_callback_indices,
+        slack_max=day_duration,
+        capacity=day_duration,
+        fix_start_cumul_to_zero=False,
+        name="Time",
     )
     time_dimension = router.GetDimensionOrDie("Time")
     for vehicle in data.vehicles.values():
         index = router.Start(vehicle.index)
         time_dimension.CumulVar(index).SetRange(0, day_duration)
         router.AddVariableMinimizedByFinalizer(
-            time_dimension.CumulVar(router.Start(vehicle.index))
+            time_dimension.CumulVar(router.Start(vehicle.index)),
         )
         router.AddVariableMinimizedByFinalizer(
-            time_dimension.CumulVar(router.End(vehicle.index))
+            time_dimension.CumulVar(router.End(vehicle.index)),
         )
 
     for node_index, node in enumerate(data.nodes):
@@ -84,36 +96,38 @@ def solve_vehicle_routing_problem(
         if node.kind == models.NodeKind.PICKUP:
             node_drop_penalty *= settings.penalty_scale_pickups
             paired_index = manager.NodeToIndex(
-                node.package.delivery_node_index(data.nodes)
+                node.package.delivery_node_index(data.nodes),
             )
             router.AddPickupAndDelivery(index, paired_index)
             router.solver().Add(
-                router.VehicleVar(index) == router.VehicleVar(paired_index)
+                router.VehicleVar(index) == router.VehicleVar(paired_index),
             )
             router.solver().Add(
                 distance_dimension.CumulVar(index)
-                <= distance_dimension.CumulVar(paired_index)
+                <= distance_dimension.CumulVar(paired_index),
             )
             for bundled_package in node.package.bundled_packages:
                 linked_index = manager.NodeToIndex(
-                    bundled_package.pickup_node_index(data.nodes)
+                    bundled_package.pickup_node_index(data.nodes),
                 )
                 router.solver().Add(
-                    router.VehicleVar(index) == router.VehicleVar(linked_index)
+                    router.VehicleVar(index) == router.VehicleVar(linked_index),
                 )
 
         router.AddDisjunction([index], int(node_drop_penalty))
 
-    def capacity_callback(from_index):
+    def capacity_callback(from_index: int) -> int:
         from_node = manager.IndexToNode(from_index)
         return data.nodes[from_node].kind.capacity_impact
 
     router.AddDimensionWithVehicleCapacity(
-        router.RegisterUnaryTransitCallback(capacity_callback),
-        0,
-        [vehicle.package_capacity for vehicle in data.vehicles.values()],
-        True,
-        "Capacity",
+        evaluator_index=router.RegisterUnaryTransitCallback(capacity_callback),
+        slack_max=0,
+        vehicle_capacities=[
+            vehicle.package_capacity for vehicle in data.vehicles.values()
+        ],
+        fix_start_cumul_to_zero=True,
+        name="Capacity",
     )
 
     search = pywrapcp.DefaultRoutingSearchParameters()
@@ -130,5 +144,11 @@ def solve_vehicle_routing_problem(
 
     if assignments:
         return models.Solution.save_solution(
-            data, scenario, settings, manager, router, assignments
+            data,
+            scenario,
+            settings,
+            manager,
+            router,
+            assignments,
         )
+    return None
