@@ -38,7 +38,7 @@ class WindowManager:
 
         self.page.window.center()
         self.page.window.width = 1000
-        self.page.window.height = 800
+        self.page.window.height = 700
         self.page.window.min_width = 600
         self.page.window.min_height = 500
         self.page.window.shadow = True
@@ -50,14 +50,15 @@ class WindowManager:
         self.page.spacing = 0
         self.page.title = "Delivery Route Planner"
         self.page.bgcolor = ft.colors.ON_INVERSE_SURFACE
-        self.page.theme_mode = ft.ThemeMode.LIGHT
 
         self.page.fonts = {
             "Roboto": "fonts/Roboto-Regular.ttf",
             "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
         }
 
-        self.page.theme = ft.Theme(
-            font_family="Roboto",
-            color_scheme_seed=ft.colors.LIME_ACCENT,
-        )
+        if self.page.platform_brightness == ft.Brightness.LIGHT:
+            self.page.theme_mode = ft.ThemeMode.LIGHT
+        else:
+            self.page.theme_mode = ft.ThemeMode.DARK
+
+        self.page.theme = ft.Theme(color_scheme_seed=ft.colors.LIGHT_GREEN_ACCENT)

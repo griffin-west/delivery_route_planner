@@ -9,31 +9,37 @@ class TitleBar:
         window_drag_area = ft.WindowDragArea(
             content=ft.Container(),
             expand=True,
-            height=(48 if self.page.platform == ft.PagePlatform.WINDOWS else 30),
+            height=(30 if self.page.platform == ft.PagePlatform.MACOS else 40),
         )
 
         minimize_button = ft.IconButton(
-            icon=ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+            padding=0,
+            height=30,
             icon_size=18,
-            tooltip="Minimize",
+            icon=ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED,
             on_click=self._minimize_window,
             icon_color=ft.colors.ON_SURFACE,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
 
         maximize_button = ft.IconButton(
-            icon=ft.icons.CROP_SQUARE_ROUNDED,
+            padding=0,
+            height=30,
             icon_size=18,
-            tooltip="Maximize",
+            icon=ft.icons.CROP_SQUARE_ROUNDED,
             on_click=self._maximize_window,
             icon_color=ft.colors.ON_SURFACE,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
 
         exit_button = ft.IconButton(
-            icon=ft.icons.CLOSE_ROUNDED,
+            padding=0,
+            height=30,
             icon_size=18,
-            tooltip="Close",
-            on_click=lambda _: self.page.window.close(),
+            icon=ft.icons.CLOSE_ROUNDED,
             icon_color=ft.colors.ON_SURFACE,
+            on_click=lambda _: self.page.window.close(),
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
 
         caption_buttons = ft.Container(

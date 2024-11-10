@@ -1,9 +1,14 @@
 import flet as ft
 
-from delivery_route_planner.components.navigation_pane import NavigationPane
+from delivery_route_planner.components.navigation import Navigation
 from delivery_route_planner.components.title_bar import TitleBar
-from delivery_route_planner.components.view_pane import ViewPane
 from delivery_route_planner.components.window_manager import WindowManager
+from delivery_route_planner.views.addresses_view import AddressesView
+from delivery_route_planner.views.packages_view import PackagesView
+from delivery_route_planner.views.reports_view import ReportsView
+from delivery_route_planner.views.routes_view import RoutesView
+from delivery_route_planner.views.setup_view import SetupView
+from delivery_route_planner.views.vehicles_view import VehiclesView
 
 
 class DeliveryRoutePlanner:
@@ -11,25 +16,21 @@ class DeliveryRoutePlanner:
         self.page = page
         self.window_manager = WindowManager(page)
         self.title_bar = TitleBar(page)
-        self.navigation_pane = NavigationPane(page)
-        self.view_pane = ViewPane(page)
+        self.views = [
+            SetupView(page),
+            PackagesView(page),
+            VehiclesView(page),
+            AddressesView(page),
+            RoutesView(page),
+            ReportsView(page),
+        ]
+        self.navigation_layout = Navigation(page, self.views)
 
-        self._setup_ui()
+        self._render_gui()
 
-    def _setup_ui(self) -> None:
-        panes_layout = ft.Row(
-            [
-                self.navigation_pane.render(),
-                self.view_pane.render(),
-            ],
-            spacing=0,
-            expand=True,
-        )
-
+    def _render_gui(self) -> None:
         self.page.add(self.title_bar.render())
-        self.page.add(panes_layout)
-
-        self.view_pane.setup_initial_content()
+        self.page.add(self.navigation_layout.render())
 
 
 def main(page: ft.Page) -> None:
