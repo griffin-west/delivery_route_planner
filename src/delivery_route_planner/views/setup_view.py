@@ -22,12 +22,14 @@ class SetupView:
         search_settings_selections = self.create_search_settings_selections()
 
         self.view.body.controls = [
+            ft.Container(height=10),
             routing_scenario_selections,
             ft.Divider(),
             search_strategy_selections,
             ft.Divider(),
             search_settings_selections,
             ft.Divider(),
+            ft.Container(height=10),
         ]
 
         return self.view.render()
@@ -81,12 +83,12 @@ class SetupView:
             help_text="Pick the earliest time vehicles may leave the depot.",
         )
         day_start_time_button = ft.Container(
-                ft.OutlinedButton(
+            ft.OutlinedButton(
                 text="Day start time: 8:00 AM",
                 icon=ft.icons.ACCESS_TIME_ROUNDED,
                 on_click=lambda _: self.page.open(time_picker),
             ),
-            padding=ft.padding.symmetric(10,0),
+            padding=ft.padding.symmetric(10, 0),
         )
 
         return ft.Column([heading, selections, day_start_time_button])
@@ -180,7 +182,7 @@ class SetupView:
         return ft.Column(
             [
                 heading,
-                first_solution_drop_down, 
+                first_solution_drop_down,
                 self.first_solution_info_card,
                 metaheuristic_dropdown,
                 optimization_dropdown,
@@ -201,25 +203,43 @@ class SetupView:
         )
         maximum_time_slider = ft.Column(
             [
-                ft.Text("Maximum time allowed to search for solutions", theme_style=ft.TextThemeStyle.LABEL_LARGE),
+                ft.Text(
+                    "Maximum time allowed to search for solutions",
+                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
+                ),
                 ft.Slider(
-                    min=0, max=300, divisions=10, label="{value} seconds",
+                    min=0,
+                    max=300,
+                    divisions=20,
+                    label="{value} seconds",
                 ),
             ],
         )
         maximum_solutions_slider = ft.Column(
             [
-                ft.Text("Maximum number of solutions generated during the search", theme_style=ft.TextThemeStyle.LABEL_LARGE),
+                ft.Text(
+                    "Maximum number of solutions generated during the search",
+                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
+                ),
                 ft.Slider(
-                    min=0, max=5000, divisions=20, label="{value} solutions",
+                    min=0,
+                    max=5000,
+                    divisions=20,
+                    label="{value} solutions",
                 ),
             ],
         )
         maximum_vehicle_mileage_slider = ft.Column(
             [
-                ft.Text("Maximum mileage allowed per vehicle", theme_style=ft.TextThemeStyle.LABEL_LARGE),
+                ft.Text(
+                    "Maximum mileage allowed per vehicle",
+                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
+                ),
                 ft.Slider(
-                    min=0, max=200, divisions=20, label="{value} miles",
+                    min=0,
+                    max=200,
+                    divisions=20,
+                    label="{value} miles",
                 ),
             ],
         )

@@ -4,7 +4,7 @@ import flet as ft
 class PageView:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self.title = ft.Text(style=ft.TextThemeStyle.HEADLINE_MEDIUM)
+        self.title = ft.Text(style=ft.TextThemeStyle.TITLE_LARGE)
         self.action_button = ft.OutlinedButton()
         self.body = ft.Column(
             expand=True,
@@ -23,9 +23,14 @@ class PageView:
 
         return ft.Container(
             content=ft.Column(
-                [header, self.body],
+                [
+                    header,
+                    ft.Container(height=20),
+                    ft.Divider(height=0),
+                    self.body,
+                ],
                 expand=True,
-                spacing=30,
+                spacing=0,
             ),
             expand=True,
         )

@@ -54,6 +54,7 @@ class WindowManager:
         self.page.fonts = {
             "Roboto": "fonts/Roboto-Regular.ttf",
             "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
+            "Outfit": "fonts/Outfit-Regular.ttf",
         }
 
         if self.page.platform_brightness == ft.Brightness.LIGHT:
@@ -61,4 +62,7 @@ class WindowManager:
         else:
             self.page.theme_mode = ft.ThemeMode.DARK
 
-        self.page.theme = ft.Theme(color_scheme_seed=ft.colors.LIGHT_GREEN_ACCENT)
+        self.page.theme = ft.Theme(
+            color_scheme_seed=ft.colors.LIGHT_GREEN_ACCENT,
+            font_family="Outfit",
+        )
