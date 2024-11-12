@@ -30,7 +30,47 @@ def main(page: ft.Page) -> None:
 
         solution = routing.solve_vehicle_routing_problem(data, scenario, settings)
 
-        solution.print_solution() if solution else print("Solution not found.")
+        if solution:
+            for route in solution.routes:
+                results_content.controls.append(ft.Text(f"Route for Vehicle {route.vehicle.id}"))
+
+                route_rows = []
+                route_table = ft.DataTable(
+                    columns=[
+                        ft.DataColumn(ft.Text("Package ID"), numeric=True),
+                        ft.DataColumn(ft.Text("Activity")),
+                        ft.DataColumn(ft.Text("Address")),
+                        ft.DataColumn(ft.Text("Load"), numeric=True),
+                        ft.DataColumn(ft.Text("Mileage"), numeric=True),
+                        ft.DataColumn(ft.Text("Time")),
+                    ],
+                    rows=route_rows,
+                )
+
+                for stop in route.stops:
+                    package_id = stop.node.package.id if stop.node.package else None
+                    row = ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(str(package_id))),
+                            ft.DataCell(ft.Text(stop.node.kind.description)),
+                            ft.DataCell(ft.Text(stop.node.address)),
+                            ft.DataCell(ft.Text(str(stop.vehicle_load))),
+                            ft.DataCell(ft.Text(str(round(stop.mileage, 1)))),
+                            ft.DataCell(ft.Text(str(stop.visit_time))),
+                        ],
+                    )
+                    route_rows.append(row)
+
+                results_content.controls.append(route_table)
+
+            results_content.controls.append(ft.Text(f"Total mileage: {round(solution.mileage, 1)}"))
+            results_content.controls.append(ft.Text(f"Packages delivered: {solution.delivered_packages_count}"))
+            results_content.controls.append(ft.Text(f"Packages missed: {solution.missed_packages_count}"))
+            results_content.controls.append(ft.Text(f"Missed packages: {solution.missed_package_ids}"))
+            results_content.controls.append(ft.Text(f"Delivery percentage: {solution.delivery_percentage}"))
+
+        else:
+            print("Solution not found.")
 
         page.update()
 
@@ -96,13 +136,34 @@ def main(page: ft.Page) -> None:
         value=60, min=30, max=600, divisions=19, label="{value}",
     )
 
-    page.add(
-        first_solution_strategy_dropdown,
-        local_search_metaheuristic_dropdown,
-        time_limit_heading,
-        time_limit_slider,
-        solve_button,
+    setup_content = ft.Column(
+        [
+            first_solution_strategy_dropdown,
+            local_search_metaheuristic_dropdown,
+            time_limit_heading,
+            time_limit_slider,
+            solve_button,
+        ],
+        scroll=ft.ScrollMode.AUTO,
     )
+
+    results_content = ft.Column(scroll=ft.ScrollMode.AUTO)
+
+    tabs = ft.Tabs(
+        tabs=[
+            ft.Tab(
+                text="Setup",
+                content=setup_content,
+            ),
+            ft.Tab(
+                text="Results",
+                content=results_content,
+            ),
+        ],
+        expand=True,
+    )
+
+    page.add(tabs)
 
 
 if __name__ == "__main__":
