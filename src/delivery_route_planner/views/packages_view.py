@@ -1,12 +1,12 @@
 import flet as ft
 
-from delivery_route_planner.components.page_view import PageView
+from delivery_route_planner.components.view_base import ViewBase
 
 
 class PackagesView:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self.view = PageView(page)
+        self.view = ViewBase(page)
         self.title = "Packages"
         self.icon = ft.icons.INVENTORY_2_OUTLINED
         self.selected_icon = ft.icons.INVENTORY_2_ROUNDED

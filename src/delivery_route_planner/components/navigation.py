@@ -7,6 +7,7 @@ class Navigation:
     def __init__(self, page: ft.Page, views):
         self.page = page
         self.views = views
+        self.initial_view = views[0]
 
     def render(self) -> ft.Row:
         navigation_pane = self.create_navigation_pane(self.views)
@@ -41,7 +42,7 @@ class Navigation:
                 hover_elevation=4,
                 width=130,
             ),
-            padding=ft.padding.symmetric(20, 0),
+            padding=ft.padding.symmetric(10, 0),
         )
         navigation_rail = ft.NavigationRail(
             destinations=destinations,
@@ -83,9 +84,9 @@ class Navigation:
 
     def create_view_pane(self) -> ft.Container:
         self.content_switcher = ft.AnimatedSwitcher(
-            content=self.views[0].render(),
-            duration=300,
-            reverse_duration=300,
+            content=self.initial_view.render(),
+            duration=200,
+            reverse_duration=200,
             transition=ft.AnimatedSwitcherTransition.FADE,
             expand=True,
         )
@@ -98,12 +99,6 @@ class Navigation:
             margin=ft.margin.only(0, 0, 24, 24),
             padding=ft.padding.only(30, 30, 30, 0),
             border=ft.border.all(1, ft.colors.SURFACE_VARIANT),
-            theme=ft.Theme(
-                scrollbar_theme=ft.ScrollbarTheme(
-                    main_axis_margin=15,
-                    cross_axis_margin=-20,
-                ),
-            ),
         )
 
     def change_view(self, e: ft.ControlEvent) -> None:

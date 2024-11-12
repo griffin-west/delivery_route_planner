@@ -4,35 +4,34 @@ from datetime import time
 
 import flet as ft
 
-from delivery_route_planner.components.page_view import PageView
+from delivery_route_planner.components.view_base import ViewBase
 
 
 class SetupView:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self.view = PageView(page)
+        self.view = ViewBase(page)
         self.title = "Setup"
         self.icon = ft.icons.EDIT_OUTLINED
         self.selected_icon = ft.icons.EDIT_ROUNDED
         self.disabled = False
+
+        self.routing_scenario_controls = self.create_routing_scenario_controls()
+        self.first_solution_controls = self.create_first_solution_controls()
+        self.search_settings_controls = self.create_search_settings_controls()
+
 
     def render(self) -> ft.Container:
         self.view.title.value = self.title
         self.view.action_button.text = "Reset defaults"
         self.view.action_button.icon = ft.icons.REFRESH_ROUNDED
 
-        routing_scenario_controls = self.create_routing_scenario_controls()
-        first_solution_controls = self.create_first_solution_controls()
-        search_settings_controls = self.create_search_settings_controls()
-
         self.view.body.controls = [
-            ft.Container(height=10),
-            routing_scenario_controls,
+            self.routing_scenario_controls,
             ft.Divider(),
-            first_solution_controls,
+            self.first_solution_controls,
             ft.Divider(),
-            search_settings_controls,
-            ft.Container(height=10),
+            self.search_settings_controls,
         ]
 
         return self.view.render()
@@ -116,7 +115,6 @@ class SetupView:
             wrap=True,
         )
 
-
         return ft.Column(
             [
                 heading,
@@ -126,7 +124,6 @@ class SetupView:
             ],
         )
 
-
     def create_first_solution_controls(self) -> ft.Column:
 
         first_solution_controls = ft.Column(
@@ -134,8 +131,12 @@ class SetupView:
                 ft.ListTile(
                     leading=ft.Icon(ft.icons.ALT_ROUTE_ROUNDED),
                     title=ft.Text("First solution strategy"),
-                    subtitle=ft.Text("Algorithms for finding an initial routing solution"),
-                    trailing=ft.TextButton(text="Learn more", icon=ft.icons.LINK_ROUNDED),
+                    subtitle=ft.Text(
+                        "Algorithms for finding an initial routing solution"
+                    ),
+                    trailing=ft.TextButton(
+                        text="Learn more", icon=ft.icons.LINK_ROUNDED
+                    ),
                 ),
             ],
         )
@@ -182,7 +183,12 @@ class SetupView:
                 subtitle=ft.Text(
                     "Select the first node with an unbound successor and connect it to the node which produces the cheapest route segment."
                 ),
-                trailing=ft.Text("Recommended!", theme_style=ft.TextThemeStyle.LABEL_LARGE, weight=ft.FontWeight.W_600, color=ft.colors.SECONDARY),
+                trailing=ft.Text(
+                    "Recommended!",
+                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
+                    weight=ft.FontWeight.W_600,
+                    color=ft.colors.SECONDARY,
+                ),
             ),
             on_select=self.on_select_fss,
             expand=True,
@@ -213,7 +219,14 @@ class SetupView:
         heading = ft.ListTile(
             leading=ft.Icon(ft.icons.DISPLAY_SETTINGS_ROUNDED),
             title=ft.Text("Search limits"),
-            subtitle=ft.Text("Vehicle routing problems are computationally intractable. Limits are set to ensure the solver does not run endlessly."),
+            subtitle=ft.Text(
+                "Vehicle routing problems are computationally intractable. Limits are set to ensure the solver does not run endlessly."
+            ),
+        )
+
+        self.time_limit_callout = ft.Text(
+            "120 seconds",
+            theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
         )
 
         time_limit_card = ft.Card(
@@ -222,10 +235,19 @@ class SetupView:
                     [
                         ft.ListTile(
                             title=ft.Text("Time limit"),
-                            subtitle=ft.Text("Longer searches will yield better results.\nAt least 120 seconds recommended."),
-                            trailing=ft.Text("120 seconds", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+                            subtitle=ft.Text(
+                                "Longer searches will yield better results.\nAt least 120 seconds recommended."
+                            ),
+                            trailing=self.time_limit_callout,
                         ),
-                        ft.Slider(value=120, min=0, max=600, divisions=20, label="{value} seconds"),
+                        ft.Slider(
+                            value=120,
+                            min=30,
+                            max=600,
+                            divisions=19,
+                            label=" {value} seconds ",
+                            on_change=self.time_limit_change,
+                        ),
                     ],
                 ),
                 padding=10,
@@ -233,7 +255,7 @@ class SetupView:
             variant=ft.CardVariant.FILLED,
             color=ft.colors.ON_INVERSE_SURFACE,
             elevation=2,
-            width=600,
+            width=500,
         )
 
         solution_limit_card = ft.Card(
@@ -242,10 +264,21 @@ class SetupView:
                     [
                         ft.ListTile(
                             title=ft.Text("Solution limit"),
-                            subtitle=ft.Text("The solver will rapidly iterate on the solutions it finds.\nAt least 1000 solutions recommended."),
-                            trailing=ft.Text("2000 solutions", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+                            subtitle=ft.Text(
+                                "Solutions are iterated very rapidly.\nAt least 1000 solutions recommended."
+                            ),
+                            trailing=ft.Text(
+                                "2000 solutions",
+                                theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
+                            ),
                         ),
-                        ft.Slider(value=2000, min=0, max=5000, divisions=20, label="{value} solutions"),
+                        ft.Slider(
+                            value=2000,
+                            min=250,
+                            max=5000,
+                            divisions=19,
+                            label=" {value} solutions ",
+                        ),
                     ],
                 ),
                 padding=10,
@@ -253,7 +286,7 @@ class SetupView:
             variant=ft.CardVariant.FILLED,
             color=ft.colors.ON_INVERSE_SURFACE,
             elevation=2,
-            width=600,
+            width=500,
         )
 
         return ft.Column(
@@ -269,3 +302,14 @@ class SetupView:
                 ),
             ],
         )
+
+    def time_limit_change(self, e: ft.ControlEvent) -> None:
+        value = int(e.control.value)
+        self.time_limit_callout.value = f"{value} seconds"
+        if value < 120:
+            self.time_limit_callout.color = ft.colors.ERROR
+            e.control.active_color = ft.colors.ERROR
+        else:
+            self.time_limit_callout.color = None
+            e.control.active_color = None
+        self.page.update()

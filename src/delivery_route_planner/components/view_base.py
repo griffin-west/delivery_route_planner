@@ -1,7 +1,7 @@
 import flet as ft
 
 
-class PageView:
+class ViewBase:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
         self.title = ft.Text(style=ft.TextThemeStyle.HEADLINE_SMALL)

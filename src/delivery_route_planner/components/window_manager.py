@@ -42,7 +42,7 @@ class WindowManager:
         self.page.window.min_width = 600
         self.page.window.min_height = 500
         self.page.window.shadow = True
-        self.page.window.prevent_close = False # Temp fix for Windows dev
+        self.page.window.prevent_close = True
         self.page.window.title_bar_hidden = True
         self.page.window.on_event = _window_event_handler
 
