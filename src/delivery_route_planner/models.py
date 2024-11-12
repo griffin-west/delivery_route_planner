@@ -8,11 +8,12 @@ from pathlib import Path
 from typing import Any, Callable, TypeAlias
 
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
+from tabulate import tabulate
 
 FSS = routing_enums_pb2.FirstSolutionStrategy
 LSM = routing_enums_pb2.LocalSearchMetaheuristic
-ADDRESS_FILE = "data/distance_matrix.csv"
-PACKAGE_FILE = "data/package_details.csv"
+ADDRESS_FILE = "src/delivery_route_planner/data/distance_matrix.csv"
+PACKAGE_FILE = "src/delivery_route_planner/data/package_details.csv"
 MILEAGE_SCALE_FACTOR = 10
 SECONDS_PER_HOUR = 3600
 SECONDS_PER_DAY = SECONDS_PER_HOUR * 24
@@ -232,7 +233,7 @@ class Package:
 
 
 class NodeKind(Enum):
-    ORIGIN = ("Route Start/End", 0)
+    ORIGIN = ("Start/End", 0)
     PICKUP = ("Pickup", 1)
     DELIVERY = ("Delivery", -1)
 
@@ -405,7 +406,7 @@ class Solution:
     routes: list[Route]
 
     @classmethod
-    def save_solution(
+    def create_solution(
         cls,
         data: DataModel,
         scenario: RoutingScenario,
@@ -462,6 +463,12 @@ class Solution:
         }
 
     @property
+    def missed_package_ids(self) -> list[int]:
+        return [
+            missed_package.id for missed_package in self.missed_packages.values()
+        ]
+
+    @property
     def delivered_packages_count(self) -> int:
         return len(self.delivered_packages)
 
@@ -478,3 +485,30 @@ class Solution:
     @property
     def delivery_percentage(self) -> str:
         return f"{round(self.delivery_success_rate * 100, 2)}%"
+
+    def print_solution(self) -> None:
+        for route in self.routes:
+            print(f"\nRoute for Vehicle {route.vehicle.id}:\n")
+
+            table_data = []
+            headers = ["Package ID", "Step", "Address", "Load", "Mileage", "Time"]
+
+            for stop in route.stops:
+                package_id = stop.node.package.id if stop.node.package else None
+                row = [
+                    package_id,
+                    stop.node.kind.description,
+                    stop.node.address,
+                    stop.vehicle_load,
+                    round(stop.mileage, 1),
+                    stop.visit_time,
+                ]
+                table_data.append(row)
+
+            print(tabulate(table_data, headers=headers, tablefmt="rst"))
+
+        print(f"\nTotal mileage: {round(self.mileage, 1)}")
+        print(f"Packages delivered: {self.delivered_packages_count}")
+        print(f"Packages missed: {self.missed_packages_count}")
+        print(f"Missed packages: {self.missed_package_ids}")
+        print(f"Delivery percentage: {self.delivery_percentage}\n\n")

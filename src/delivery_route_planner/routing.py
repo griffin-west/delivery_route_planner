@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import Callable
 
-from models import models
 from ortools.constraint_solver import pywrapcp
+
+from delivery_route_planner import models
 
 
 def solve_vehicle_routing_problem(
@@ -143,7 +144,7 @@ def solve_vehicle_routing_problem(
     assignments = router.SolveWithParameters(search)
 
     if assignments:
-        return models.Solution.save_solution(
+        return models.Solution.create_solution(
             data,
             scenario,
             settings,
