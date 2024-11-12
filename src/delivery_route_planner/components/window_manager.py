@@ -37,12 +37,12 @@ class WindowManager:
             self.page.update()
 
         self.page.window.center()
-        self.page.window.width = 1000
-        self.page.window.height = 700
+        self.page.window.width = 1280
+        self.page.window.height = 720
         self.page.window.min_width = 600
         self.page.window.min_height = 500
         self.page.window.shadow = True
-        self.page.window.prevent_close = True
+        self.page.window.prevent_close = False # Temp fix for Windows dev
         self.page.window.title_bar_hidden = True
         self.page.window.on_event = _window_event_handler
 
@@ -63,6 +63,18 @@ class WindowManager:
             self.page.theme_mode = ft.ThemeMode.DARK
 
         self.page.theme = ft.Theme(
-            color_scheme_seed=ft.colors.LIGHT_GREEN_ACCENT,
             font_family="Outfit",
+            chip_theme=ft.ChipTheme(
+                border_side=ft.border.BorderSide(0, ft.colors.TRANSPARENT),
+                bgcolor=ft.colors.ON_INVERSE_SURFACE,
+                elevation=2,
+            ),
+        )
+
+        self.page.dark_theme = ft.Theme(
+            font_family="Outfit",
+            chip_theme=ft.ChipTheme(
+                border_side=ft.border.BorderSide(1, ft.colors.OUTLINE_VARIANT),
+                bgcolor=ft.colors.SURFACE,
+            ),
         )

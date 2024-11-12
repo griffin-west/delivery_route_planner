@@ -24,7 +24,7 @@ class Navigation:
     def create_navigation_pane(self, views) -> ft.Container:
         destinations = [
             ft.NavigationRailDestination(
-                label=view.title,
+                label_content=ft.Text(view.title, size=14),
                 icon=view.icon,
                 selected_icon=view.selected_icon,
                 disabled=view.disabled,
@@ -33,11 +33,13 @@ class Navigation:
         ]
         floating_action_button = ft.Container(
             ft.FloatingActionButton(
-                text="Solve",
+                text="  Solve",
                 icon=ft.icons.AUTO_AWESOME_ROUNDED,
-                bgcolor=ft.colors.PRIMARY,
-                foreground_color=ft.colors.ON_PRIMARY,
-                width=120,
+                bgcolor=ft.colors.TERTIARY_CONTAINER,
+                foreground_color=ft.colors.ON_TERTIARY_CONTAINER,
+                elevation=2,
+                hover_elevation=4,
+                width=130,
             ),
             padding=ft.padding.symmetric(20, 0),
         )
@@ -50,7 +52,6 @@ class Navigation:
             min_extended_width=170,
             indicator_color=ft.colors.INVERSE_PRIMARY,
             bgcolor=ft.colors.TRANSPARENT,
-            label_type=ft.NavigationRailLabelType.NONE,
             leading=floating_action_button,
             on_change=self.change_view,
         )
@@ -61,10 +62,12 @@ class Navigation:
                 else ft.icons.LIGHT_MODE_OUTLINED
             ),
             on_click=self._toggle_dark_mode,
+            icon_color=ft.colors.ON_SURFACE,
         )
         color_button = ft.IconButton(
             icon=ft.icons.COLOR_LENS_OUTLINED,
             on_click=self._randomize_colors,
+            icon_color=ft.colors.ON_SURFACE,
         )
 
         return ft.Container(
@@ -81,10 +84,9 @@ class Navigation:
     def create_view_pane(self) -> ft.Container:
         self.content_switcher = ft.AnimatedSwitcher(
             content=self.views[0].render(),
-            duration=200,
-            reverse_duration=0,
-            switch_in_curve=ft.AnimationCurve.EASE_OUT_CIRC,
-            transition=ft.AnimatedSwitcherTransition.SCALE,
+            duration=300,
+            reverse_duration=300,
+            transition=ft.AnimatedSwitcherTransition.FADE,
             expand=True,
         )
 
@@ -119,7 +121,7 @@ class Navigation:
 
     def _randomize_colors(self, e: ft.ControlEvent) -> None:
         _ = e
-        if self.page.theme is None:
-            self.page.theme = ft.Theme()
-        self.page.theme.color_scheme_seed = ft.colors.random_color()
+        new_color = ft.colors.random_color()
+        self.page.theme.color_scheme_seed = new_color
+        self.page.dark_theme.color_scheme_seed = new_color
         self.page.update()

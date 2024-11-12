@@ -4,13 +4,13 @@ import flet as ft
 class PageView:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self.title = ft.Text(style=ft.TextThemeStyle.TITLE_LARGE)
+        self.title = ft.Text(style=ft.TextThemeStyle.HEADLINE_SMALL)
         self.action_button = ft.OutlinedButton()
         self.body = ft.Column(
             expand=True,
             scroll=ft.ScrollMode.AUTO,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
-            spacing=30,
+            spacing=20,
         )
 
     def render(self) -> ft.Container:

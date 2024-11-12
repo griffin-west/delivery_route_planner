@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from datetime import time
+
 import flet as ft
 
 from delivery_route_planner.components.page_view import PageView
@@ -17,238 +21,251 @@ class SetupView:
         self.view.action_button.text = "Reset defaults"
         self.view.action_button.icon = ft.icons.REFRESH_ROUNDED
 
-        routing_scenario_selections = self.create_routing_scenario_selections()
-        search_strategy_selections = self.create_search_strategy_selections()
-        search_settings_selections = self.create_search_settings_selections()
+        routing_scenario_controls = self.create_routing_scenario_controls()
+        first_solution_controls = self.create_first_solution_controls()
+        search_settings_controls = self.create_search_settings_controls()
 
         self.view.body.controls = [
             ft.Container(height=10),
-            routing_scenario_selections,
+            routing_scenario_controls,
             ft.Divider(),
-            search_strategy_selections,
+            first_solution_controls,
             ft.Divider(),
-            search_settings_selections,
-            ft.Divider(),
+            search_settings_controls,
             ft.Container(height=10),
         ]
 
         return self.view.render()
 
-    def create_routing_scenario_selections(self) -> ft.Column:
+    def create_routing_scenario_controls(self) -> ft.Column:
         heading = ft.ListTile(
             leading=ft.Icon(ft.icons.CHECKLIST_ROUNDED),
             title=ft.Text("Routing scenario"),
             subtitle=ft.Text(
-                "Select the requirements that must be met by the routing solution.",
+                "Requirements that must be met by routing solutions",
             ),
         )
-        selections = ft.Row(
+        first_row_selections = ft.Row(
             [
                 ft.Chip(
-                    selected=True,
-                    show_checkmark=True,
                     label=ft.Text("Vehicle carry capacities"),
                     on_select=lambda _: _,
                 ),
                 ft.Chip(
-                    selected=True,
-                    show_checkmark=True,
                     label=ft.Text("Delivery deadlines"),
                     on_select=lambda _: _,
                 ),
                 ft.Chip(
-                    selected=True,
-                    show_checkmark=True,
                     label=ft.Text("Shipping delays"),
                     on_select=lambda _: _,
                 ),
                 ft.Chip(
-                    selected=True,
-                    show_checkmark=True,
                     label=ft.Text("Vehicle-specified deliveries"),
                     on_select=lambda _: _,
                 ),
                 ft.Chip(
-                    selected=True,
-                    show_checkmark=True,
                     label=ft.Text("Keep bundled packages together"),
                     on_select=lambda _: _,
                 ),
             ],
             wrap=True,
         )
-        time_picker = ft.TimePicker(
+
+        start_time_picker = ft.TimePicker(
             confirm_text="Confirm",
             error_invalid_text="Time out of range",
-            help_text="Pick the earliest time vehicles may leave the depot.",
+            help_text="Pick the earliest time vehicles may begin.",
+            value=time(8),
         )
-        day_start_time_button = ft.Container(
-            ft.OutlinedButton(
-                text="Day start time: 8:00 AM",
-                icon=ft.icons.ACCESS_TIME_ROUNDED,
-                on_click=lambda _: self.page.open(time_picker),
-            ),
-            padding=ft.padding.symmetric(10, 0),
+        end_time_picker = ft.TimePicker(
+            confirm_text="Confirm",
+            error_invalid_text="Time out of range",
+            help_text="Pick the latest time vehicles must finish.",
+            value=time(18),
         )
 
-        return ft.Column([heading, selections, day_start_time_button])
-
-    def create_search_strategy_selections(self) -> ft.Column:
-        heading = ft.ListTile(
-            leading=ft.Icon(ft.icons.SEARCH_ROUNDED),
-            title=ft.Text("Search strategies"),
-            subtitle=ft.Text(
-                "Select the algorithms to be used in the solution search.",
-            ),
-            trailing=ft.TextButton(text="Learn more", icon=ft.icons.LINK_ROUNDED),
-        )
-        first_solution_drop_down = ft.Dropdown(
-            label="First solution strategy",
-            helper_text="The algorithm used to find the first routing solution.",
-            width=400,
-            padding=ft.padding.symmetric(10, 5),
-            filled=True,
-            border_width=0,
-            border_radius=10,
-            icon_enabled_color=ft.colors.ON_SURFACE,
-            icon_content=ft.Icon(ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED),
-            fill_color=ft.colors.SURFACE_VARIANT,
-            label_style=ft.TextStyle(color=ft.colors.ON_SURFACE),
-            on_change=self.show_first_solution_info_card,
-            options=[
-                ft.dropdown.Option("Local cheapest arc"),
-                ft.dropdown.Option("Global cheapest arc"),
-                ft.dropdown.Option("Path cheapest arc"),
-                ft.dropdown.Option("Local cheapest insertion"),
-                ft.dropdown.Option("Parallel cheapest insertion"),
-                ft.dropdown.Option("Best insertion"),
-                ft.dropdown.Option("First unbound min value"),
-                ft.dropdown.Option("Christofides"),
-                ft.dropdown.Option("Savings"),
-                ft.dropdown.Option("Sweep"),
-            ],
-        )
-        metaheuristic_dropdown = ft.Dropdown(
-            label="Local search metaheuristic",
-            helper_text="The algorithm used to iterate and improve solutions.",
-            width=400,
-            padding=ft.padding.symmetric(10, 5),
-            filled=True,
-            border_width=0,
-            border_radius=10,
-            icon_enabled_color=ft.colors.ON_SURFACE,
-            icon_content=ft.Icon(ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED),
-            fill_color=ft.colors.SURFACE_VARIANT,
-            label_style=ft.TextStyle(color=ft.colors.ON_SURFACE),
-            options=[
-                ft.dropdown.Option("Guided local search"),
-                ft.dropdown.Option("Simulated annealing"),
-                ft.dropdown.Option("Greedy descent"),
-                ft.dropdown.Option("Tabu search"),
-                ft.dropdown.Option("Generic tabu search"),
-            ],
-        )
-        optimization_dropdown = ft.Dropdown(
-            label="Optimization focus",
-            helper_text="Determines which solutions to prioritize.",
-            width=400,
-            padding=ft.padding.symmetric(10, 5),
-            filled=True,
-            border_width=0,
-            border_radius=10,
-            icon_enabled_color=ft.colors.ON_SURFACE,
-            icon_content=ft.Icon(ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED),
-            fill_color=ft.colors.SURFACE_VARIANT,
-            label_style=ft.TextStyle(color=ft.colors.ON_SURFACE),
-            options=[
-                ft.dropdown.Option("Lowest total mileage"),
-                ft.dropdown.Option("Earliest deliveries"),
-            ],
-        )
-        self.first_solution_info_card = ft.Card(
-            ft.ListTile(
-                leading=ft.Icon(ft.icons.INFO_OUTLINE_ROUNDED),
-                title=ft.Text("Path cheapest arc"),
-                subtitle=ft.Text(
-                    "Starting from a route 'start' node, connect it to the node which produces the cheapest route segment, then extend the route by iterating on the last node added to the route."
+        second_row_selections = ft.Row(
+            [
+                ft.FilledTonalButton(
+                    text="Start time: 8:00 AM",
+                    icon=ft.icons.ACCESS_TIME_ROUNDED,
+                    on_click=lambda _: self.page.open(start_time_picker),
                 ),
-            ),
-            variant=ft.CardVariant.FILLED,
-            expand=True,
-            color=ft.colors.SECONDARY_CONTAINER,
-            visible=False,
+                ft.FilledTonalButton(
+                    text="End time: 6:00 PM",
+                    icon=ft.icons.ACCESS_TIME_ROUNDED,
+                    on_click=lambda _: self.page.open(end_time_picker),
+                ),
+                ft.SegmentedButton(
+                    on_change=lambda _: _,
+                    selected={"Shortest mileage"},
+                    allow_multiple_selection=False,
+                    show_selected_icon=True,
+                    segments=[
+                        ft.Segment(
+                            value="Shortest mileage",
+                            label=ft.Text("Shortest mileage"),
+                        ),
+                        ft.Segment(
+                            value="Earliest deliveries",
+                            label=ft.Text("Earliest deliveries"),
+                        ),
+                    ],
+                ),
+            ],
+            wrap=True,
         )
+
 
         return ft.Column(
             [
                 heading,
-                first_solution_drop_down,
-                self.first_solution_info_card,
-                metaheuristic_dropdown,
-                optimization_dropdown,
+                first_row_selections,
+                ft.Container(height=5),
+                second_row_selections,
             ],
         )
 
-    def show_first_solution_info_card(self, e: ft.ControlEvent) -> None:
-        self.first_solution_info_card.visible = True
+
+    def create_first_solution_controls(self) -> ft.Column:
+
+        first_solution_controls = ft.Column(
+            [
+                ft.ListTile(
+                    leading=ft.Icon(ft.icons.ALT_ROUTE_ROUNDED),
+                    title=ft.Text("First solution strategy"),
+                    subtitle=ft.Text("Algorithms for finding an initial routing solution"),
+                    trailing=ft.TextButton(text="Learn more", icon=ft.icons.LINK_ROUNDED),
+                ),
+            ],
+        )
+
+        self.first_solution_strategies = self.create_first_solution_strategies()
+        first_solution_controls.controls.extend(self.first_solution_strategies)
+
+        return first_solution_controls
+
+    def create_first_solution_strategies(self) -> list[ft.Chip]:
+
+        automatic_chip = ft.Chip(
+            label=ft.ListTile(
+                leading=ft.Icon(ft.icons.CHECK_ROUNDED, visible=False),
+                title=ft.Text("Automatic"),
+                subtitle=ft.Text(
+                    "Lets the solver detect which strategy to use according to the model being solved."
+                ),
+            ),
+            on_select=self.on_select_fss,
+            expand=True,
+            padding=0,
+            label_padding=0,
+            show_checkmark=False,
+        )
+        global_cheapest_arc_chip = ft.Chip(
+            label=ft.ListTile(
+                leading=ft.Icon(ft.icons.CHECK_ROUNDED, visible=False),
+                title=ft.Text("Global cheapest arc"),
+                subtitle=ft.Text(
+                    "Iteratively connect two nodes which produce the cheapest route segment."
+                ),
+            ),
+            on_select=self.on_select_fss,
+            expand=True,
+            padding=0,
+            label_padding=0,
+            show_checkmark=False,
+        )
+        local_cheapest_arc_chip = ft.Chip(
+            label=ft.ListTile(
+                leading=ft.Icon(ft.icons.CHECK_ROUNDED, visible=False),
+                title=ft.Text("Local cheapest arc"),
+                subtitle=ft.Text(
+                    "Select the first node with an unbound successor and connect it to the node which produces the cheapest route segment."
+                ),
+                trailing=ft.Text("Recommended!", theme_style=ft.TextThemeStyle.LABEL_LARGE, weight=ft.FontWeight.W_600, color=ft.colors.SECONDARY),
+            ),
+            on_select=self.on_select_fss,
+            expand=True,
+            padding=0,
+            label_padding=0,
+            show_checkmark=False,
+        )
+
+        return [
+            automatic_chip,
+            global_cheapest_arc_chip,
+            local_cheapest_arc_chip,
+        ]
+
+    def on_select_fss(self, e: ft.ControlEvent) -> None:
+        if e.control.selected:
+            e.control.label.leading.visible = True
+        else:
+            e.control.label.leading.visible = False
+        for first_solution_strategy in self.first_solution_strategies:
+            if first_solution_strategy is not e.control:
+                first_solution_strategy.selected = False
+                first_solution_strategy.label.leading.visible = False
         self.page.update()
 
-    def create_search_settings_selections(self) -> ft.Column:
+    def create_search_settings_controls(self) -> ft.Column:
+
         heading = ft.ListTile(
             leading=ft.Icon(ft.icons.DISPLAY_SETTINGS_ROUNDED),
-            title=ft.Text("Search settings"),
-            subtitle=ft.Text(
-                "Adjust the settings to be used in the solution search.",
+            title=ft.Text("Search limits"),
+            subtitle=ft.Text("Vehicle routing problems are computationally intractable. Limits are set to ensure the solver does not run endlessly."),
+        )
+
+        time_limit_card = ft.Card(
+            ft.Container(
+                ft.Column(
+                    [
+                        ft.ListTile(
+                            title=ft.Text("Time limit"),
+                            subtitle=ft.Text("Longer searches will yield better results.\nAt least 120 seconds recommended."),
+                            trailing=ft.Text("120 seconds", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+                        ),
+                        ft.Slider(value=120, min=0, max=600, divisions=20, label="{value} seconds"),
+                    ],
+                ),
+                padding=10,
             ),
+            variant=ft.CardVariant.FILLED,
+            color=ft.colors.ON_INVERSE_SURFACE,
+            elevation=2,
+            width=600,
         )
-        maximum_time_slider = ft.Column(
-            [
-                ft.Text(
-                    "Maximum time allowed to search for solutions",
-                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
+
+        solution_limit_card = ft.Card(
+            ft.Container(
+                ft.Column(
+                    [
+                        ft.ListTile(
+                            title=ft.Text("Solution limit"),
+                            subtitle=ft.Text("The solver will rapidly iterate on the solutions it finds.\nAt least 1000 solutions recommended."),
+                            trailing=ft.Text("2000 solutions", theme_style=ft.TextThemeStyle.HEADLINE_SMALL),
+                        ),
+                        ft.Slider(value=2000, min=0, max=5000, divisions=20, label="{value} solutions"),
+                    ],
                 ),
-                ft.Slider(
-                    min=0,
-                    max=300,
-                    divisions=20,
-                    label="{value} seconds",
-                ),
-            ],
-        )
-        maximum_solutions_slider = ft.Column(
-            [
-                ft.Text(
-                    "Maximum number of solutions generated during the search",
-                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
-                ),
-                ft.Slider(
-                    min=0,
-                    max=5000,
-                    divisions=20,
-                    label="{value} solutions",
-                ),
-            ],
-        )
-        maximum_vehicle_mileage_slider = ft.Column(
-            [
-                ft.Text(
-                    "Maximum mileage allowed per vehicle",
-                    theme_style=ft.TextThemeStyle.LABEL_LARGE,
-                ),
-                ft.Slider(
-                    min=0,
-                    max=200,
-                    divisions=20,
-                    label="{value} miles",
-                ),
-            ],
+                padding=10,
+            ),
+            variant=ft.CardVariant.FILLED,
+            color=ft.colors.ON_INVERSE_SURFACE,
+            elevation=2,
+            width=600,
         )
 
         return ft.Column(
             [
                 heading,
-                maximum_time_slider,
-                maximum_solutions_slider,
-                maximum_vehicle_mileage_slider,
+                ft.Row(
+                    [
+                        time_limit_card,
+                        solution_limit_card,
+                    ],
+                    wrap=True,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
+                ),
             ],
         )

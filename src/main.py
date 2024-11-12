@@ -29,7 +29,6 @@ class DeliveryRoutePlanner:
         self._render_gui()
 
     def _render_gui(self) -> None:
-        self.page.platform = ft.PagePlatform.WINDOWS
         self.page.add(self.title_bar.render())
         self.page.add(self.navigation_layout.render())
 
