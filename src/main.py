@@ -17,12 +17,14 @@ def main(page: ft.Page) -> None:
 
         if first_solution_strategy_dropdown.value:
             settings.first_solution_strategy = getattr(
-                FirstSolutionStrategy, first_solution_strategy_dropdown.value,
+                FirstSolutionStrategy,
+                first_solution_strategy_dropdown.value,
             )
 
         if local_search_metaheuristic_dropdown.value:
             settings.local_search_metaheuristic = getattr(
-                LocalSearchMetaheuristic, local_search_metaheuristic_dropdown.value,
+                LocalSearchMetaheuristic,
+                local_search_metaheuristic_dropdown.value,
             )
 
         if time_limit_slider.value:
@@ -32,7 +34,9 @@ def main(page: ft.Page) -> None:
 
         if solution:
             for route in solution.routes:
-                results_content.controls.append(ft.Text(f"Route for Vehicle {route.vehicle.id}"))
+                results_content.controls.append(
+                    ft.Text(f"Route for Vehicle {route.vehicle.id}")
+                )
 
                 route_rows = []
                 route_table = ft.DataTable(
@@ -63,11 +67,21 @@ def main(page: ft.Page) -> None:
 
                 results_content.controls.append(route_table)
 
-            results_content.controls.append(ft.Text(f"Total mileage: {round(solution.mileage, 1)}"))
-            results_content.controls.append(ft.Text(f"Packages delivered: {solution.delivered_packages_count}"))
-            results_content.controls.append(ft.Text(f"Packages missed: {solution.missed_packages_count}"))
-            results_content.controls.append(ft.Text(f"Missed packages: {solution.missed_package_ids}"))
-            results_content.controls.append(ft.Text(f"Delivery percentage: {solution.delivery_percentage}"))
+            results_content.controls.append(
+                ft.Text(f"Total mileage: {round(solution.mileage, 1)}")
+            )
+            results_content.controls.append(
+                ft.Text(f"Packages delivered: {solution.delivered_packages_count}")
+            )
+            results_content.controls.append(
+                ft.Text(f"Packages missed: {solution.missed_packages_count}")
+            )
+            results_content.controls.append(
+                ft.Text(f"Missed packages: {solution.missed_package_ids}")
+            )
+            results_content.controls.append(
+                ft.Text(f"Delivery percentage: {solution.delivery_percentage}")
+            )
 
         else:
             print("Solution not found.")
@@ -133,7 +147,11 @@ def main(page: ft.Page) -> None:
 
     time_limit_heading = ft.Text("Time limit in seconds:")
     time_limit_slider = ft.Slider(
-        value=60, min=30, max=600, divisions=19, label="{value}",
+        value=60,
+        min=30,
+        max=600,
+        divisions=19,
+        label="{value}",
     )
 
     setup_content = ft.Column(
