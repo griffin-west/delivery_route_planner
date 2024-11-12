@@ -298,7 +298,7 @@ class SearchSettings:
     use_search_logging: bool = True
     first_solution_strategy: OrToolsEnum = FSS.LOCAL_CHEAPEST_INSERTION
     local_search_metaheuristic: OrToolsEnum = LSM.GUIDED_LOCAL_SEARCH
-    solver_time_limit_seconds: int | None = 600
+    solver_time_limit_seconds: int | None = 120
     solver_solution_limit: int | None = 10000
 
 
@@ -464,9 +464,7 @@ class Solution:
 
     @property
     def missed_package_ids(self) -> list[int]:
-        return [
-            missed_package.id for missed_package in self.missed_packages.values()
-        ]
+        return [missed_package.id for missed_package in self.missed_packages.values()]
 
     @property
     def delivered_packages_count(self) -> int:
