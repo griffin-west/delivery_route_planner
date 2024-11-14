@@ -9,35 +9,54 @@ def main(page: ft.Page) -> None:
 
     results_content = ft.Column(
         [
-            ft.Text("Solution has not been created yet."),
+            ft.Card(
+                ft.Container(
+                    ft.Text("Solution has not been created yet."),
+                    padding=30,
+                ),
+                color=ft.colors.SURFACE,
+                elevation=2,
+            ),
         ],
-        alignment=ft.MainAxisAlignment.CENTER,
         scroll=ft.ScrollMode.AUTO,
+        spacing=30,
     )
     results_page = ft.Container(
         results_content,
         alignment=ft.alignment.center,
-        padding=ft.padding.symmetric(0, 20),
+        padding=ft.padding.symmetric(0, 30),
+        bgcolor=ft.colors.ON_INVERSE_SURFACE,
     )
 
     charts_content = ft.Column(
         [
-            ft.Text("Solution has not been created yet."),
+            ft.Card(
+                ft.Container(
+                    ft.Text("Solution has not been created yet."),
+                    padding=30,
+                ),
+                color=ft.colors.SURFACE,
+                elevation=2,
+            ),
         ],
-        alignment=ft.MainAxisAlignment.CENTER,
         scroll=ft.ScrollMode.AUTO,
+        spacing=30,
     )
     charts_page = ft.Container(
         charts_content,
         alignment=ft.alignment.center,
-        padding=ft.padding.symmetric(0, 20),
+        padding=ft.padding.symmetric(0, 30),
+        bgcolor=ft.colors.ON_INVERSE_SURFACE,
     )
 
-    setup_content = gui.create_setup_content(page, results_content, charts_content, data)
+    setup_content = gui.create_setup_content(
+        page, results_content, charts_content, data,
+    )
     setup_page = ft.Container(
         content=setup_content,
         alignment=ft.alignment.center,
-        padding=ft.padding.symmetric(0, 20),
+        padding=ft.padding.symmetric(0, 30),
+        bgcolor=ft.colors.ON_INVERSE_SURFACE,
     )
 
     page_tabs = ft.Tabs(
@@ -54,17 +73,19 @@ def main(page: ft.Page) -> None:
             ),
             ft.Tab(
                 text="Charts",
-                icon=ft.icons.AUTO_GRAPH_ROUNDED,
+                icon=ft.icons.BAR_CHART_ROUNDED,
                 content=charts_page,
             ),
         ],
         expand=True,
         animation_duration=150,
+        divider_height=2,
     )
 
     page.title = "Deliver Route Planner"
-    page.window.min_height = 450
-    page.window.min_width = 400
+    page.window.min_width = 800
+    page.window.min_height = 600
+    page.window.center()
     page.padding = 0
 
     page.add(page_tabs)
