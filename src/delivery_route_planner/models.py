@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Callable, TypeAlias
 
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
-from tabulate import tabulate
 
 FSS = routing_enums_pb2.FirstSolutionStrategy
 LSM = routing_enums_pb2.LocalSearchMetaheuristic
@@ -309,9 +308,12 @@ class DataModel:
     vehicles: VehicleDict
     packages: PackageDict
     nodes: list[Node]
+    scenario: RoutingScenario
+    settings: SearchSettings
+    solution: Solution | None = None
 
     @classmethod
-    def with_defaults(cls) -> DataModel:
+    def create_with_defaults(cls) -> DataModel:
         scenario = RoutingScenario()
         addresses = Address.from_csv()
         vehicles = Vehicle.with_shared_attributes(
@@ -327,6 +329,8 @@ class DataModel:
             vehicles=vehicles,
             packages=packages,
             nodes=Node.from_packages(packages),
+            scenario=scenario,
+            settings=SearchSettings(),
         )
 
 
@@ -483,30 +487,3 @@ class Solution:
     @property
     def delivery_percentage(self) -> str:
         return f"{round(self.delivery_success_rate * 100, 2)}%"
-
-    def print_solution(self) -> None:
-        for route in self.routes:
-            print(f"\nRoute for Vehicle {route.vehicle.id}:\n")
-
-            table_data = []
-            headers = ["Package ID", "Step", "Address", "Load", "Mileage", "Time"]
-
-            for stop in route.stops:
-                package_id = stop.node.package.id if stop.node.package else None
-                row = [
-                    package_id,
-                    stop.node.kind.description,
-                    stop.node.address,
-                    stop.vehicle_load,
-                    round(stop.mileage, 1),
-                    stop.visit_time,
-                ]
-                table_data.append(row)
-
-            print(tabulate(table_data, headers=headers, tablefmt="rst"))
-
-        print(f"\nTotal mileage: {round(self.mileage, 1)}")
-        print(f"Packages delivered: {self.delivered_packages_count}")
-        print(f"Packages missed: {self.missed_packages_count}")
-        print(f"Missed packages: {self.missed_package_ids}")
-        print(f"Delivery percentage: {self.delivery_percentage}\n\n")
