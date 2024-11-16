@@ -1,21 +1,23 @@
 import flet as ft
 
-from delivery_route_planner.components.view_base import ViewBase
-
 
 class RoutesView:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self.view = ViewBase(page)
-        self.color = ft.colors.ORANGE_100
         self.title = "Routes"
         self.icon = ft.icons.ROUTE_OUTLINED
         self.selected_icon = ft.icons.ROUTE_ROUNDED
         self.disabled = True
 
-    def render(self) -> ft.Container:
-        self.view.title.value = self.title
+    def render(self) -> ft.Column:
+        title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
+        header = ft.Container(
+            ft.Row(
+                [title],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            ),
+            padding=30,
+        )
+        body = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO)
 
-        self.view.body.controls = []
-
-        return self.view.render()
+        return ft.Column([header, body])

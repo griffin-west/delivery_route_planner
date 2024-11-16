@@ -9,7 +9,7 @@ class WindowManager:
     def _setup_window(self) -> None:
         close_alert = ft.AlertDialog(
             modal=True,
-            icon=ft.Icon(ft.icons.FRONT_HAND_ROUNDED),
+            icon=ft.Icon(ft.icons.EXIT_TO_APP_ROUNDED),
             title=ft.Text("Exit app?", text_align=ft.TextAlign.CENTER),
             actions_alignment=ft.MainAxisAlignment.END,
             content=ft.Column(
@@ -36,45 +36,25 @@ class WindowManager:
                 self.page.open(close_alert)
             self.page.update()
 
-        self.page.window.center()
+        self.page.title = "Delivery Route Planner"
         self.page.window.width = 1280
         self.page.window.height = 720
-        self.page.window.min_width = 600
-        self.page.window.min_height = 500
+        self.page.window.min_width = 450
+        self.page.window.min_height = 450
         self.page.window.shadow = True
         self.page.window.prevent_close = True
         self.page.window.title_bar_hidden = True
         self.page.window.on_event = _window_event_handler
-
         self.page.padding = 0
         self.page.spacing = 0
-        self.page.title = "Delivery Route Planner"
-        self.page.bgcolor = ft.colors.ON_INVERSE_SURFACE
+        self.page.window.center()
 
         self.page.fonts = {
+            "Outfit": "fonts/Outfit-Regular.ttf",
             "Roboto": "fonts/Roboto-Regular.ttf",
             "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
-            "Outfit": "fonts/Outfit-Regular.ttf",
         }
-
-        if self.page.platform_brightness == ft.Brightness.LIGHT:
-            self.page.theme_mode = ft.ThemeMode.LIGHT
-        else:
-            self.page.theme_mode = ft.ThemeMode.DARK
-
         self.page.theme = ft.Theme(
             font_family="Outfit",
-            chip_theme=ft.ChipTheme(
-                border_side=ft.border.BorderSide(0, ft.colors.TRANSPARENT),
-                bgcolor=ft.colors.ON_INVERSE_SURFACE,
-                elevation=2,
-            ),
         )
-
-        self.page.dark_theme = ft.Theme(
-            font_family="Outfit",
-            chip_theme=ft.ChipTheme(
-                border_side=ft.border.BorderSide(1, ft.colors.OUTLINE_VARIANT),
-                bgcolor=ft.colors.SURFACE,
-            ),
-        )
+        self.page.bgcolor = ft.colors.SURFACE_VARIANT
