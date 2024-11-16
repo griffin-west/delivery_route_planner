@@ -29,6 +29,7 @@ class Navigation:
             leading=ft.Container(
                 ft.FloatingActionButton(
                     icon=ft.icons.AUTO_AWESOME_ROUNDED,
+                    tooltip="Create delivery routes",
                     bgcolor=ft.colors.PRIMARY,
                     foreground_color=ft.colors.ON_PRIMARY,
                     elevation=2,

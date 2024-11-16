@@ -11,8 +11,8 @@ from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 FSS = routing_enums_pb2.FirstSolutionStrategy
 LSM = routing_enums_pb2.LocalSearchMetaheuristic
-ADDRESS_FILE = "data/distance_matrix.csv"
-PACKAGE_FILE = "data/package_details.csv"
+ADDRESS_FILE = "src/delivery_route_planner/data/distance_matrix.csv"
+PACKAGE_FILE = "src/delivery_route_planner/data/package_details.csv"
 MILEAGE_SCALE_FACTOR = 10
 SECONDS_PER_HOUR = 3600
 SECONDS_PER_DAY = SECONDS_PER_HOUR * 24
@@ -118,7 +118,7 @@ class RoutingTime:
     _total_seconds: int
 
     def __str__(self) -> str:
-        return self.time.strftime("%H:%M:%S %p")
+        return self.time.strftime("%-I:%M:%S %p")
 
     @classmethod
     def from_time(cls, t: time) -> RoutingTime:

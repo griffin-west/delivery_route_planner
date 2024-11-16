@@ -56,5 +56,6 @@ class WindowManager:
         }
         self.page.theme = ft.Theme(
             font_family="Outfit",
+            color_scheme_seed=ft.colors.random_color(),
         )
         self.page.bgcolor = ft.colors.SURFACE_VARIANT
