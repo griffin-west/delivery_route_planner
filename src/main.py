@@ -50,7 +50,10 @@ def main(page: ft.Page) -> None:
     )
 
     setup_content = gui.create_setup_content(
-        page, results_content, charts_content, data,
+        page,
+        results_content,
+        charts_content,
+        data,
     )
     setup_page = ft.Container(
         content=setup_content,
@@ -78,15 +81,15 @@ def main(page: ft.Page) -> None:
             ),
         ],
         expand=True,
-        animation_duration=150,
-        divider_height=2,
+        animation_duration=200,
     )
 
     page.title = "Deliver Route Planner"
-    page.window.min_width = 800
-    page.window.min_height = 600
+    page.window.width = 1280
+    page.window.height = 720
     page.window.center()
     page.padding = 0
+    page.theme_mode = ft.ThemeMode.LIGHT
 
     page.add(page_tabs)
 

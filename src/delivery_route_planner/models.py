@@ -118,7 +118,7 @@ class RoutingTime:
     _total_seconds: int
 
     def __str__(self) -> str:
-        return self.time.strftime("%H:%M:%S %p")
+        return self.time.strftime("%-I:%M:%S %p")
 
     @classmethod
     def from_time(cls, t: time) -> RoutingTime:
