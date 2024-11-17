@@ -23,7 +23,7 @@ class DeliveryRoutePlanner:
         self.window_manager = WindowManager(page)
         self.title_bar = TitleBar(page)
         self.views = [
-            SetupView(page),
+            SetupView(page, self.data, self.settings),
             PackagesView(page, self.data),
             VehiclesView(page, self.data),
             AddressesView(page, self.data),
