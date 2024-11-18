@@ -37,8 +37,8 @@ class WindowManager:
             self.page.update()
 
         self.page.title = "Delivery Route Planner"
-        self.page.window.width = 1050
-        self.page.window.height = 700
+        self.page.window.width = 1280
+        self.page.window.height = 720
         self.page.window.min_width = 600
         self.page.window.min_height = 500
         self.page.window.shadow = True

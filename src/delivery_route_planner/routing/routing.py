@@ -6,11 +6,7 @@ from models import models
 from ortools.constraint_solver import pywrapcp
 
 
-def solve_vehicle_routing_problem(
-    data: models.DataModel,
-    scenario: models.RoutingScenario,
-    settings: models.SearchSettings,
-) -> models.Solution | None:
+def solve_vehicle_routing_problem(data: models.DataModel) -> models.Solution | None:
 
     manager = pywrapcp.RoutingIndexManager(
         len(data.nodes),
@@ -29,16 +25,16 @@ def solve_vehicle_routing_problem(
     router.AddDimension(
         evaluator_index=distance_callback_index,
         slack_max=0,
-        capacity=settings.max_mileage_per_vehicle * models.MILEAGE_SCALE_FACTOR,
+        capacity=data.settings.max_mileage_per_vehicle * models.MILEAGE_SCALE_FACTOR,
         fix_start_cumul_to_zero=True,
         name="Distance",
     )
     distance_dimension = router.GetDimensionOrDie("Distance")
     distance_dimension.SetGlobalSpanCostCoefficient(
-        settings.distance_span_cost_coefficient,
+        data.settings.distance_span_cost_coefficient,
     )
 
-    day_duration = scenario.day_start.duration_until(scenario.day_end)
+    day_duration = data.scenario.day_start.duration_until(data.scenario.day_end)
 
     time_callback_indices = []
     for vehicle in data.vehicles.values():
@@ -80,21 +76,21 @@ def solve_vehicle_routing_problem(
             continue
 
         index = manager.NodeToIndex(node_index)
-        start_time = node.package.shipping_availability or scenario.day_start
-        end_time = node.package.delivery_deadline or scenario.day_end
-        start_seconds = start_time.duration_after(scenario.day_start)
-        end_seconds = end_time.duration_after(scenario.day_start)
+        start_time = node.package.shipping_availability or data.scenario.day_start
+        end_time = node.package.delivery_deadline or data.scenario.day_end
+        start_seconds = start_time.duration_after(data.scenario.day_start)
+        end_seconds = end_time.duration_after(data.scenario.day_start)
         time_dimension.CumulVar(index).SetRange(start_seconds, end_seconds)
-        node_drop_penalty = settings.base_penalty
+        node_drop_penalty = data.settings.base_penalty
         node_drop_penalty *= day_duration / (end_seconds - start_seconds)
         req_vehicle_index = node.package.required_vehicle_index
 
         if req_vehicle_index:
             router.SetAllowedVehiclesForIndex([req_vehicle_index], index)
-            node_drop_penalty *= settings.penalty_scale_req_vehicle
+            node_drop_penalty *= data.settings.penalty_scale_req_vehicle
 
         if node.kind == models.NodeKind.PICKUP:
-            node_drop_penalty *= settings.penalty_scale_pickups
+            node_drop_penalty *= data.settings.penalty_scale_pickups
             paired_index = manager.NodeToIndex(
                 node.package.delivery_node_index(data.nodes),
             )
@@ -131,22 +127,20 @@ def solve_vehicle_routing_problem(
     )
 
     search = pywrapcp.DefaultRoutingSearchParameters()
-    search.first_solution_strategy = settings.first_solution_strategy
-    search.local_search_metaheuristic = settings.local_search_metaheuristic
-    search.use_full_propagation = settings.use_full_propagation
-    if settings.solver_time_limit_seconds:
-        search.time_limit.seconds = settings.solver_time_limit_seconds
-    if settings.solver_solution_limit:
-        search.solution_limit = settings.solver_solution_limit
-    search.log_search = settings.use_search_logging
+    search.first_solution_strategy = data.settings.first_solution_strategy
+    search.local_search_metaheuristic = data.settings.local_search_metaheuristic
+    search.use_full_propagation = data.settings.use_full_propagation
+    if data.settings.solver_time_limit_seconds:
+        search.time_limit.seconds = data.settings.solver_time_limit_seconds
+    if data.settings.solver_solution_limit:
+        search.solution_limit = data.settings.solver_solution_limit
+    search.log_search = data.settings.use_search_logging
 
     assignments = router.SolveWithParameters(search)
 
     if assignments:
         return models.Solution.save_solution(
             data,
-            scenario,
-            settings,
             manager,
             router,
             assignments,

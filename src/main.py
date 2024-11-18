@@ -17,8 +17,6 @@ class DeliveryRoutePlanner:
         self.page = page
 
         self.data = models.DataModel.with_defaults()
-        self.scenario = models.RoutingScenario()
-        self.settings = models.SearchSettings()
 
         self.window_manager = WindowManager(page)
         self.title_bar = TitleBar(page)
@@ -29,7 +27,7 @@ class DeliveryRoutePlanner:
             elevation=4,
         )
         self.views = [
-            SetupView(page, self.data, self.settings),
+            SetupView(page, self.data),
             PackagesView(page, self.data),
             VehiclesView(page, self.view_pane, self.data),
             AddressesView(page, self.data),

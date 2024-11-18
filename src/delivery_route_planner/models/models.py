@@ -142,7 +142,7 @@ class RoutingTime:
     _total_seconds: int
 
     def __str__(self) -> str:
-        return self.time.strftime("%I:%M:%S %p").lstrip("0")
+        return self.time.strftime("%I:%M:%S %p").lstrip("0").lower()
 
     @classmethod
     def from_time(cls, t: time) -> RoutingTime:
@@ -321,8 +321,8 @@ class SearchSettings:
     use_search_logging: bool = True
     first_solution_strategy: OrToolsEnum = FSS.LOCAL_CHEAPEST_INSERTION
     local_search_metaheuristic: OrToolsEnum = LSM.GUIDED_LOCAL_SEARCH
-    solver_time_limit_seconds: int | None = 600
-    solver_solution_limit: int | None = 10000
+    solver_time_limit_seconds: int | None = 120
+    solver_solution_limit: int | None = 2000
 
 
 @dataclass
@@ -332,6 +332,8 @@ class DataModel:
     vehicles: VehicleDict
     packages: PackageDict
     nodes: list[Node]
+    scenario: RoutingScenario
+    settings: SearchSettings
 
     @classmethod
     def with_defaults(cls) -> DataModel:
@@ -350,6 +352,8 @@ class DataModel:
             vehicles=vehicles,
             packages=packages,
             nodes=Node.from_packages(packages),
+            scenario=RoutingScenario(),
+            settings=SearchSettings(),
         )
 
 
@@ -370,8 +374,7 @@ class Route:
     def create_route(
         cls,
         vehicle: Vehicle,
-        nodes: list[Node],
-        day_start: RoutingTime,
+        data: DataModel,
         manager: pywrapcp.RoutingIndexManager,
         router: pywrapcp.RoutingModel,
         assignments: pywrapcp.Assignment,
@@ -384,10 +387,12 @@ class Route:
 
         def create_stop(index: int, previous_index: int | None) -> Stop:
             nonlocal vehicle_load, mileage
-            node = nodes[manager.IndexToNode(index)]
+            node = data.nodes[manager.IndexToNode(index)]
             vehicle_load += node.kind.capacity_impact
             route_seconds = assignments.Min(time_dimension.CumulVar(index))
-            visit_time = RoutingTime.from_seconds(day_start.seconds + route_seconds)
+            visit_time = RoutingTime.from_seconds(
+                data.scenario.day_start.seconds + route_seconds,
+            )
             if previous_index:
                 mileage += (
                     router.GetArcCostForVehicle(previous_index, index, vehicle.index)
@@ -424,29 +429,22 @@ class Route:
 @dataclass
 class Solution:
     data: DataModel
-    scenario: RoutingScenario
-    settings: SearchSettings
     routes: list[Route]
 
     @classmethod
     def save_solution(
         cls,
         data: DataModel,
-        scenario: RoutingScenario,
-        settings: SearchSettings,
         manager: pywrapcp.RoutingIndexManager,
         router: pywrapcp.RoutingModel,
         assignments: pywrapcp.Assignment,
     ) -> Solution:
         return cls(
             data=data,
-            scenario=scenario,
-            settings=settings,
             routes=[
                 Route.create_route(
                     vehicle,
-                    data.nodes,
-                    scenario.day_start,
+                    data,
                     manager,
                     router,
                     assignments,
