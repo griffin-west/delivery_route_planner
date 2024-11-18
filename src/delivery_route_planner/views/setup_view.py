@@ -27,7 +27,9 @@ class SetupView:
         self.start_time_card = self.create_start_time_card()
         self.time_limit_card = self.create_time_limit_card()
         self.solution_limit_card = self.create_solution_limit_card()
-        self.requirements_card = self.create_requirements_card()
+        self.search_logging_card = self.create_search_logging_card()
+        self.vehicles_card = self.create_vehicles_card()
+        self.packages_card = self.create_packages_card()
 
     def render(self) -> ft.Column:
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
@@ -43,9 +45,12 @@ class SetupView:
         settings_row = ft.Container(
             ft.Row(
                 [
+                    self.vehicles_card,
+                    self.packages_card,
                     self.start_time_card,
                     self.time_limit_card,
                     self.solution_limit_card,
+                    self.search_logging_card,
                 ],
                 wrap=True,
                 spacing=30,
@@ -57,7 +62,6 @@ class SetupView:
         algorithms_row = ft.Container(
             ft.Row(
                 [
-                    self.requirements_card,
                     self.first_solution_card,
                     self.metaheuristic_card,
                 ],
@@ -124,7 +128,8 @@ class SetupView:
                                     label="Local Cheapest Insertion",
                                 ),
                                 ft.Icon(
-                                    ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY,
+                                    ft.icons.STAR_RATE_ROUNDED,
+                                    color=ft.colors.PRIMARY,
                                 ),
                             ],
                         ),
@@ -182,7 +187,8 @@ class SetupView:
                                     label="Guided Local Search",
                                 ),
                                 ft.Icon(
-                                    ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY,
+                                    ft.icons.STAR_RATE_ROUNDED,
+                                    color=ft.colors.PRIMARY,
                                 ),
                             ],
                         ),
@@ -236,6 +242,7 @@ class SetupView:
         self.time_limit_callout = ft.Text(
             "120 seconds",
             theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
+            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
         )
         time_limit_header = ft.ListTile(
             leading=ft.Icon(ft.icons.TIMER_OUTLINED),
@@ -281,14 +288,15 @@ class SetupView:
 
     def create_solution_limit_card(self) -> ft.Card:
         self.solution_limit_callout = ft.Text(
-            "2000 solutions",
+            "2000",
             theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
+            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
         )
         solution_limit_header = ft.ListTile(
             leading=ft.Icon(ft.icons.REFRESH_ROUNDED),
             title=ft.Text("Solution iteration limit"),
             subtitle=ft.Text(
-                "More iterations will yield better results.",
+                "Solutions are iterated very rapidly " "as optimized routes are found.",
             ),
             trailing=self.solution_limit_callout,
         )
@@ -317,7 +325,7 @@ class SetupView:
 
     def solution_limit_change(self, e: ft.ControlEvent) -> None:
         value = int(e.control.value)
-        self.solution_limit_callout.value = f"{value} solutions"
+        self.solution_limit_callout.value = f"{value}"
         if value < MINIMUM_SOLUTIONS_RECOMMENDED:
             self.solution_limit_callout.color = ft.colors.ERROR
             e.control.active_color = ft.colors.ERROR
@@ -330,9 +338,10 @@ class SetupView:
         self.start_time_callout = ft.Text(
             "8:00 AM",
             theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
+            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
         )
         start_time_header = ft.ListTile(
-            leading=ft.Icon(ft.icons.TODAY_ROUNDED),
+            leading=ft.Icon(ft.icons.ACCESS_TIME_ROUNDED),
             title=ft.Text("Day start time"),
             subtitle=ft.Text(
                 "This is the earliest time deliveries may begin.",
@@ -342,7 +351,6 @@ class SetupView:
         start_time_button = ft.Container(
             ft.ElevatedButton(
                 text="Select new time",
-                icon=ft.icons.MORE_TIME_ROUNDED,
             ),
             padding=ft.padding.only(0, 0, 20, 10),
         )
@@ -361,65 +369,90 @@ class SetupView:
             width=400,
         )
 
-    def create_requirements_card(self) -> ft.Card:
-        requirements_header = ft.ListTile(
-            leading=ft.Icon(ft.icons.CHECKLIST_ROUNDED),
-            title=ft.Text("Solution requirements"),
+    def create_search_logging_card(self) -> ft.Card:
+        logging_header = ft.ListTile(
+            leading=ft.Icon(ft.icons.TERMINAL_ROUNDED),
+            title=ft.Text("Search logging"),
             subtitle=ft.Text(
-                "Decide which constraints must be respected by the solver.",
+                "Enables detailed logging from OR-Tools. "
+                "Displays as STDOUT in the terminal.",
             ),
         )
-        requirements_toggles = ft.Container(
-            ft.Row(
-                [
-                    ft.ListTile(
-                        title=ft.Checkbox(label="Vehicle capacities", value=True),
-                        subtitle=ft.Text(
-                            "Vehicles may only carry a maximum "
-                            "number of packages at once.",
-                        ),
-                    ),
-                    ft.ListTile(
-                        title=ft.Checkbox(label="Shipping delays", value=True),
-                        subtitle=ft.Text(
-                            "Packages cannot leave the Depot until "
-                            "their availability time.",
-                        ),
-                    ),
-                    ft.ListTile(
-                        title=ft.Checkbox(label="Delivery deadlines", value=True),
-                        subtitle=ft.Text(
-                            "Packages must be devliered before "
-                            "their delivery deadline.",
-                        ),
-                    ),
-                    ft.ListTile(
-                        title=ft.Checkbox(
-                            label="Package-vehicle requirements", value=True,
-                        ),
-                        subtitle=ft.Text(
-                            "Packages must be delivered by their specified vehicle.",
-                        ),
-                    ),
-                    ft.ListTile(
-                        title=ft.Checkbox(label="Linked packages", value=True),
-                        subtitle=ft.Text(
-                            "Packages that are linked together must "
-                            "be delivered by the same vehicle.",
-                        ),
-                    ),
-                ],
-                wrap=True,
-            ),
-            padding=ft.padding.only(10, 0, 10, 10),
+        logging_switch = ft.Container(
+            ft.Switch(value=True),
+            padding=ft.padding.only(0, 0, 20, 10),
         )
-
         return ft.Card(
             ft.Container(
                 ft.Column(
                     [
-                        requirements_header,
-                        requirements_toggles,
+                        logging_header,
+                        logging_switch,
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.END,
+                ),
+                padding=10,
+            ),
+            variant=ft.CardVariant.FILLED,
+            width=400,
+        )
+
+    def create_vehicles_card(self) -> ft.Card:
+        self.vehicles_callout = ft.Text(
+            "2",
+            theme_style=ft.TextThemeStyle.TITLE_LARGE,
+            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
+        )
+        vehicles_header = ft.ListTile(
+            leading=ft.Icon(ft.icons.LOCAL_SHIPPING_OUTLINED),
+            title=ft.Text("Vehicles in use"),
+            subtitle=ft.Text(
+                "Use the Vehicles page to view, modify, or add " "new vehicles.",
+            ),
+            trailing=self.vehicles_callout,
+        )
+        vehicles_disclaimer = ft.Container(
+            ft.Text("*Work in progress.\nVehicles can only be added at this time."),
+            padding=ft.padding.only(20, 0, 20, 10),
+        )
+        return ft.Card(
+            ft.Container(
+                ft.Column(
+                    [
+                        vehicles_header,
+                        vehicles_disclaimer,
+                    ],
+                ),
+                padding=10,
+            ),
+            variant=ft.CardVariant.FILLED,
+            width=400,
+        )
+
+    def create_packages_card(self) -> ft.Card:
+        self.packages_callout = ft.Text(
+            "40",
+            theme_style=ft.TextThemeStyle.TITLE_LARGE,
+            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
+        )
+        packages_header = ft.ListTile(
+            leading=ft.Icon(ft.icons.INVENTORY_2_OUTLINED),
+            title=ft.Text("Packages to deliver"),
+            subtitle=ft.Text(
+                "Use the Packages page to view, modify, or add " "new packages.",
+            ),
+            trailing=self.packages_callout,
+        )
+        packages_disclaimer = ft.Container(
+            ft.Text("*Work in progress.\nPackages cannot be modified at this time."),
+            padding=ft.padding.only(20, 0, 20, 10),
+        )
+        return ft.Card(
+            ft.Container(
+                ft.Column(
+                    [
+                        packages_header,
+                        packages_disclaimer,
                     ],
                 ),
                 padding=10,

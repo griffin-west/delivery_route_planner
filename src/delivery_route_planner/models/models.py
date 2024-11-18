@@ -107,6 +107,30 @@ class Vehicle:
             for vehicle_id in range(1, vehicle_count + 1)
         }
 
+    @classmethod
+    def add_to_fleet(
+        cls,
+        data: DataModel,
+        vehicle_id: int,
+        speed_mph: float,
+        package_capacity: int,
+    ) -> None:
+        new_travel_map = TravelCostMap.with_duration(data.addresses, speed_mph)
+        new_vehicle = cls(
+            id=vehicle_id,
+            speed_mph=speed_mph,
+            package_capacity=package_capacity,
+            duration_map=new_travel_map,
+        )
+        data.vehicles[vehicle_id] = new_vehicle
+
+    @classmethod
+    def find_max_vehicle_id(cls, vehicles: VehicleDict) -> int:
+        max_vehicle_id = 0
+        for vehicle in vehicles.values():
+            max_vehicle_id = max(max_vehicle_id, vehicle.id)
+        return max_vehicle_id
+
     @property
     def index(self) -> int:
         """OR-Tools uses 0-based indexing for all vehicle references."""
@@ -118,7 +142,7 @@ class RoutingTime:
     _total_seconds: int
 
     def __str__(self) -> str:
-        return self.time.strftime("%-I:%M:%S %p")
+        return self.time.strftime("%I:%M:%S %p").lstrip("0")
 
     @classmethod
     def from_time(cls, t: time) -> RoutingTime:

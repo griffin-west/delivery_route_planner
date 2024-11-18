@@ -22,15 +22,21 @@ class DeliveryRoutePlanner:
 
         self.window_manager = WindowManager(page)
         self.title_bar = TitleBar(page)
+        self.view_pane = ft.Card(
+            content=ft.Container(border_radius=15),
+            margin=ft.margin.only(0, 0, 24, 24),
+            expand=True,
+            elevation=4,
+        )
         self.views = [
             SetupView(page, self.data, self.settings),
             PackagesView(page, self.data),
-            VehiclesView(page, self.data),
+            VehiclesView(page, self.view_pane, self.data),
             AddressesView(page, self.data),
             RoutesView(page),
             ReportsView(page),
         ]
-        self.navigation_layout = Navigation(page, self.views)
+        self.navigation_layout = Navigation(page, self.view_pane, self.views)
 
         self._render_gui()
 
