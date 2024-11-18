@@ -8,7 +8,10 @@ MINIMUM_SOLUTIONS_RECOMMENDED = 1000
 
 class SetupView:
     def __init__(
-        self, page: ft.Page, data: models.DataModel, settings: models.SearchSettings,
+        self,
+        page: ft.Page,
+        data: models.DataModel,
+        settings: models.SearchSettings,
     ) -> None:
         self.page = page
         self.data = data
@@ -96,7 +99,9 @@ class SetupView:
                             label="Best Insertion",
                         ),
                         subtitle=ft.Text(
-                            "Iteratively build a solution by inserting the cheapest node at its cheapest position; the cost of insertion is based on the global cost function of the routing model.",
+                            "Iteratively build a solution by inserting the cheapest "
+                            "node at its cheapest position; the cost of insertion is "
+                            "based on the global cost function of the routing model.",
                         ),
                     ),
                     ft.ListTile(
@@ -105,7 +110,10 @@ class SetupView:
                             label="Parallel Cheapest Insertion",
                         ),
                         subtitle=ft.Text(
-                            "Iteratively build a solution by inserting the cheapest node at its cheapest position; the cost of insertion is based on the arc cost function. Is faster than 'Best Insertion'.",
+                            "Iteratively build a solution by inserting the cheapest "
+                            "node at its cheapest position; the cost of insertion is "
+                            "based on the arc cost function. Is faster than "
+                            "'Best Insertion'.",
                         ),
                     ),
                     ft.ListTile(
@@ -115,11 +123,18 @@ class SetupView:
                                     value="LOCAL_CHEAPEST_INSERTION",
                                     label="Local Cheapest Insertion",
                                 ),
-                                ft.Icon(ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY),
+                                ft.Icon(
+                                    ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY,
+                                ),
                             ],
                         ),
                         subtitle=ft.Text(
-                            "Iteratively build a solution by inserting each node at its cheapest position; the cost of insertion is based on the arc cost function. Differs from 'Parallel Cheapest Insertion' by the node selected for insertion; here nodes are considered in their order of creation. Is faster than 'Parallel Cheapest Insertion'.",
+                            "Iteratively build a solution by inserting each node at "
+                            "its cheapest position; the cost of insertion is based on "
+                            "the arc cost function. Differs from 'Parallel Cheapest "
+                            "Insertion' by the node selected for insertion; here nodes "
+                            "are considered in their order of creation. Is faster than "
+                            "'Parallel Cheapest Insertion'.",
                         ),
                     ),
                 ],
@@ -140,7 +155,10 @@ class SetupView:
         local_search_metaheuristic_header = ft.ListTile(
             leading=ft.Icon(ft.icons.HUB_OUTLINED),
             title=ft.Text("Local search metaheuristic"),
-            subtitle=ft.Text("Select a more advanced algorithm used to optimize the initial solution."),
+            subtitle=ft.Text(
+                "Select a more advanced algorithm used "
+                "to optimize the initial solution.",
+            ),
         )
         self.local_search_metaheuristic_radio_group = ft.RadioGroup(
             content=ft.Column(
@@ -152,7 +170,8 @@ class SetupView:
                             label="Greedy Descent",
                         ),
                         subtitle=ft.Text(
-                            "Accepts improving (cost-reducing) local search neighbors until a local minimum is reached.",
+                            "Accepts improving (cost-reducing) local search neighbors "
+                            "until a local minimum is reached.",
                         ),
                     ),
                     ft.ListTile(
@@ -162,11 +181,15 @@ class SetupView:
                                     value="GUIDED_LOCAL_SEARCH",
                                     label="Guided Local Search",
                                 ),
-                                ft.Icon(ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY),
+                                ft.Icon(
+                                    ft.icons.STAR_RATE_ROUNDED, color=ft.colors.PRIMARY,
+                                ),
                             ],
                         ),
                         subtitle=ft.Text(
-                            "Uses guided local search to escape local minima. This is generally the most efficient metaheuristic for vehicle routing.",
+                            "Uses guided local search to escape local minima. "
+                            "This is generally the most efficient metaheuristic "
+                            "for vehicle routing.",
                         ),
                     ),
                     ft.ListTile(
@@ -191,7 +214,8 @@ class SetupView:
                             label="Generic Tabu Search",
                         ),
                         subtitle=ft.Text(
-                            "Uses tabu search on the objective value of solution to escape local minima.",
+                            "Uses tabu search on the objective value of solution to "
+                            "escape local minima.",
                         ),
                     ),
                 ],
@@ -350,23 +374,39 @@ class SetupView:
                 [
                     ft.ListTile(
                         title=ft.Checkbox(label="Vehicle capacities", value=True),
-                        subtitle=ft.Text("Vehicles may only carry a maximum number of packages at once."),
+                        subtitle=ft.Text(
+                            "Vehicles may only carry a maximum "
+                            "number of packages at once.",
+                        ),
                     ),
                     ft.ListTile(
                         title=ft.Checkbox(label="Shipping delays", value=True),
-                        subtitle=ft.Text("Packages cannot leave the Depot until their availability time."),
+                        subtitle=ft.Text(
+                            "Packages cannot leave the Depot until "
+                            "their availability time.",
+                        ),
                     ),
                     ft.ListTile(
                         title=ft.Checkbox(label="Delivery deadlines", value=True),
-                        subtitle=ft.Text("Packages must be devliered before their delivery deadline."),
+                        subtitle=ft.Text(
+                            "Packages must be devliered before "
+                            "their delivery deadline.",
+                        ),
                     ),
                     ft.ListTile(
-                        title=ft.Checkbox(label="Package-vehicle requirements", value=True),
-                        subtitle=ft.Text("Packages must be delivered by their specified vehicle."),
+                        title=ft.Checkbox(
+                            label="Package-vehicle requirements", value=True,
+                        ),
+                        subtitle=ft.Text(
+                            "Packages must be delivered by their specified vehicle.",
+                        ),
                     ),
                     ft.ListTile(
                         title=ft.Checkbox(label="Linked packages", value=True),
-                        subtitle=ft.Text("Packages that are linked together must be delivered by the same vehicle."),
+                        subtitle=ft.Text(
+                            "Packages that are linked together must "
+                            "be delivered by the same vehicle.",
+                        ),
                     ),
                 ],
                 wrap=True,
