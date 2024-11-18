@@ -37,10 +37,10 @@ class WindowManager:
             self.page.update()
 
         self.page.title = "Delivery Route Planner"
-        self.page.window.width = 1210
-        self.page.window.height = 700
-        self.page.window.min_width = 450
-        self.page.window.min_height = 450
+        self.page.window.width = 1050
+        self.page.window.height = 600
+        self.page.window.min_width = 600
+        self.page.window.min_height = 500
         self.page.window.shadow = True
         self.page.window.prevent_close = True
         self.page.window.title_bar_hidden = True

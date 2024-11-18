@@ -27,13 +27,18 @@ class Navigation:
     def create_navigation_pane(self, views) -> ft.NavigationRail:  # noqa: ANN001
         return ft.NavigationRail(
             leading=ft.Container(
-                ft.FloatingActionButton(
-                    icon=ft.icons.AUTO_AWESOME_ROUNDED,
-                    tooltip="Create delivery routes",
-                    bgcolor=ft.colors.PRIMARY,
-                    foreground_color=ft.colors.ON_PRIMARY,
-                    elevation=2,
-                    hover_elevation=4,
+                ft.Column(
+                    [
+                        ft.FloatingActionButton(
+                            icon=ft.icons.AUTO_AWESOME_ROUNDED,
+                            bgcolor=ft.colors.PRIMARY,
+                            foreground_color=ft.colors.ON_PRIMARY,
+                            elevation=2,
+                            hover_elevation=4,
+                        ),
+                        ft.Text("Solve"),
+                    ],
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
                 padding=20,
             ),
