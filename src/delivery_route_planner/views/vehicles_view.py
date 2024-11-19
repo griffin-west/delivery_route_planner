@@ -7,11 +7,9 @@ class VehiclesView:
     def __init__(
         self,
         page: ft.Page,
-        view_pane: ft.Card,
         data: models.DataModel,
     ) -> None:
         self.page = page
-        self.view_pane = view_pane
         self.data = data
 
         self.title = "Vehicles"
@@ -147,5 +145,4 @@ class VehiclesView:
             self.new_vehicle_speed,
             self.new_vehicle_capacity,
         )
-        self.view_pane.content = self.render()
         self.page.update()

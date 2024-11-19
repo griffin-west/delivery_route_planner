@@ -1,19 +1,23 @@
-from __future__ import annotations
 
 import flet as ft
 
 
 class Navigation:
-    def __init__(self, page: ft.Page, view_pane, views) -> None:  # noqa: ANN001
+    def __init__(self, page: ft.Page, views) -> None:
         self.page = page
         self.views = views
-        self.view_pane = view_pane
+        self.view_pane = ft.Card(
+            content=ft.Container(),
+            margin=ft.margin.only(0, 0, 24, 24),
+            expand=True,
+            elevation=4,
+        )
+        self.navigation_pane = self.create_navigation_pane(self.views)
 
     def render(self) -> ft.Row:
-        navigation_pane = self.create_navigation_pane(self.views)
         self.view_pane.content = self.views[0].render()
         return ft.Row(
-            [navigation_pane, self.view_pane],
+            [self.navigation_pane, self.view_pane],
             expand=True,
             spacing=0,
         )

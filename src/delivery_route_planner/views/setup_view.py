@@ -434,7 +434,7 @@ class SetupView:
 
         def local_search_metaheuristic_change(_e: ft.ControlEvent) -> None:
             if local_search_metaheuristic_radio_group.value:
-                self.data.settings.first_solution_strategy = getattr(
+                self.data.settings.local_search_metaheuristic = getattr(
                     LocalSearchMetaheuristic,
                     local_search_metaheuristic_radio_group.value,
                 )
@@ -565,15 +565,18 @@ class SetupView:
             ),
         )
         requirements_toggles = ft.Container(
-            ft.Row(
+            ft.Column(
                 [
+                    ft.Text(
+                        "*Work in progress.\n "
+                        "These options are not yet user-customizable.",
+                    ),
                     capacity_checkbox,
                     availability_checkbox,
                     deadlines_checkbox,
                     package_vehicle_checkbox,
                     linked_packages_checkbox,
                 ],
-                wrap=True,
             ),
             padding=ft.padding.only(10, 0, 10, 10),
         )
