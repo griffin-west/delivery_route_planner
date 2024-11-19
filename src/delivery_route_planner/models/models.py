@@ -171,6 +171,10 @@ class RoutingTime:
     def seconds(self) -> int:
         return self._total_seconds
 
+    @property
+    def short_str(self) -> str:
+        return self.time.strftime("%I:%M %p").lstrip("0").lower()
+
     def duration_until(self, other: RoutingTime) -> int:
         return other.seconds - self.seconds
 

@@ -11,7 +11,6 @@ class TitleBar:
             expand=True,
             height=(30 if self.page.platform == ft.PagePlatform.MACOS else 40),
         )
-
         minimize_button = ft.IconButton(
             padding=0,
             height=30,
@@ -21,7 +20,6 @@ class TitleBar:
             icon_color=ft.colors.ON_SURFACE,
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
-
         maximize_button = ft.IconButton(
             padding=0,
             height=30,
@@ -31,7 +29,6 @@ class TitleBar:
             icon_color=ft.colors.ON_SURFACE,
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
-
         exit_button = ft.IconButton(
             padding=0,
             height=30,
@@ -41,7 +38,6 @@ class TitleBar:
             on_click=lambda _: self.page.window.close(),
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
-
         caption_buttons = ft.Container(
             content=ft.Row(
                 controls=[
@@ -54,7 +50,6 @@ class TitleBar:
             padding=ft.padding.all(5),
             visible=(self.page.platform == ft.PagePlatform.WINDOWS),
         )
-
         return ft.Row(
             controls=[
                 window_drag_area,
@@ -64,12 +59,10 @@ class TitleBar:
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
 
-    def _minimize_window(self, e: ft.ControlEvent) -> None:
-        _ = e
+    def _minimize_window(self, _e: ft.ControlEvent) -> None:
         self.page.window.minimized = True
         self.page.update()
 
-    def _maximize_window(self, e: ft.ControlEvent) -> None:
-        _ = e
+    def _maximize_window(self, _e: ft.ControlEvent) -> None:
         self.page.window.maximized = not self.page.window.maximized
         self.page.update()

@@ -9,13 +9,8 @@ from delivery_route_planner.models import models
 MINIMUM_SECONDS_RECOMMENDED = 60
 MINIMUM_SOLUTIONS_RECOMMENDED = 1000
 
-
 class SetupView:
-    def __init__(
-        self,
-        page: ft.Page,
-        data: models.DataModel,
-    ) -> None:
+    def __init__(self, page: ft.Page, data: models.DataModel) -> None:
         self.page = page
         self.data = data
 
@@ -108,7 +103,7 @@ class SetupView:
             trailing=self.vehicles_callout,
         )
         vehicles_disclaimer = ft.Container(
-            ft.Text("*Work in progress.\nOnly new vehicles can be added at this time."),
+            ft.Text("*Work in progress.\nVehicles cannot be modified at this time."),
             padding=ft.padding.only(20, 0, 20, 10),
         )
         return ft.Card(
@@ -123,7 +118,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_packages_card(self) -> ft.Card:
@@ -156,7 +150,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_start_time_card(self) -> ft.Card:
@@ -166,7 +159,7 @@ class SetupView:
                 self.data.scenario.day_start = models.RoutingTime.from_time(
                     e.control.value,
                 )
-                start_time_callout.value = str(self.data.scenario.day_start)
+                start_time_callout.value = self.data.scenario.day_start.short_str
                 self.page.update()
 
             time_picker = ft.TimePicker(
@@ -179,7 +172,7 @@ class SetupView:
             self.page.open(time_picker)
 
         start_time_callout = ft.Text(
-            str(self.data.scenario.day_start),
+            self.data.scenario.day_start.short_str,
             theme_style=ft.TextThemeStyle.TITLE_MEDIUM,
             style=ft.TextStyle(weight=ft.FontWeight.BOLD),
         )
@@ -211,7 +204,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_time_limit_card(self) -> ft.Card:
@@ -262,7 +254,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_solution_limit_card(self) -> ft.Card:
@@ -313,7 +304,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_search_logging_card(self) -> ft.Card:
@@ -349,7 +339,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_first_solution_strategy_card(self) -> ft.Card:
@@ -427,7 +416,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_local_search_metaheuristic_card(self) -> ft.Card:
@@ -518,7 +506,6 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            elevation=2,
         )
 
     def create_requirements_card(self) -> ft.Card:
