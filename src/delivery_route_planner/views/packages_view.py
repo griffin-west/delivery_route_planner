@@ -7,7 +7,6 @@ class PackagesView:
     def __init__(self, page: ft.Page, data: models.DataModel) -> None:
         self.page = page
         self.data = data
-
         self.title = "Packages"
         self.icon = ft.icons.INVENTORY_2_OUTLINED
         self.selected_icon = ft.icons.INVENTORY_2_ROUNDED
@@ -40,17 +39,12 @@ class PackagesView:
             padding=30,
         )
         body = ft.Column(
-            controls=[
-                self.create_package_table(),
-            ],
+            controls=[self.create_package_table()],
             expand=True,
             scroll=ft.ScrollMode.AUTO,
         )
         return ft.Column(
-            [
-                header,
-                body,
-            ],
+            [header, body],
             spacing=0,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
@@ -76,6 +70,11 @@ class PackagesView:
             clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             show_checkbox_column=True,
         )
+
+        def row_selected(e: ft.ControlEvent) -> None:
+            e.control.selected = not e.control.selected
+            self.page.update()
+
         for package in self.data.packages.values():
             vehicle_requirement = (
                 package.vehicle_requirement.id if package.vehicle_requirement else None
@@ -108,12 +107,19 @@ class PackagesView:
                             placeholder=bundled_packages is None,
                         ),
                     ],
-                    on_select_changed=lambda _: _,
+                    on_select_changed=row_selected,
                     selected=True,
                 ),
             )
 
         return ft.Container(
-            content=package_table,
+            content=ft.Column(
+                [
+                    package_table,
+                    ft.Text(
+                        "*Work in progress. Row selection currently has no effect.",
+                    ),
+                ],
+            ),
             padding=ft.padding.only(30, 0, 30, 30),
         )

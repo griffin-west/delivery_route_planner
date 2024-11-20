@@ -40,17 +40,12 @@ class VehiclesView:
             padding=30,
         )
         body = ft.Column(
-            controls=[
-                self.create_vehicle_table(),
-            ],
+            controls=[self.create_vehicle_table()],
             expand=True,
             scroll=ft.ScrollMode.AUTO,
         )
         return ft.Column(
-            [
-                header,
-                body,
-            ],
+            [header, body],
             spacing=0,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
@@ -72,6 +67,11 @@ class VehiclesView:
             clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             show_checkbox_column=True,
         )
+
+        def row_selected(e: ft.ControlEvent) -> None:
+            e.control.selected = not e.control.selected
+            self.page.update()
+
         vehicle_rows.extend(
             ft.DataRow(
                 cells=[
@@ -79,13 +79,20 @@ class VehiclesView:
                     ft.DataCell(ft.Text(str(round(vehicle.speed_mph, 1)))),
                     ft.DataCell(ft.Text(str(vehicle.package_capacity))),
                 ],
-                on_select_changed=lambda _: _,
+                on_select_changed=row_selected,
                 selected=True,
             )
             for vehicle in self.data.vehicles.values()
         )
 
         return ft.Container(
-            content=vehicle_table,
+            content=ft.Column(
+                [
+                    vehicle_table,
+                    ft.Text(
+                        "*Work in progress. Row selection currently has no effect.",
+                    ),
+                ],
+            ),
             padding=ft.padding.only(30, 0, 30, 30),
         )

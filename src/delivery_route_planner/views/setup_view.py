@@ -9,6 +9,7 @@ from delivery_route_planner.models import models
 MINIMUM_SECONDS_RECOMMENDED = 60
 MINIMUM_SOLUTIONS_RECOMMENDED = 1000
 
+
 class SetupView:
     def __init__(self, page: ft.Page, data: models.DataModel) -> None:
         self.page = page
@@ -353,7 +354,7 @@ class SetupView:
         first_solution_strategy_header = ft.ListTile(
             leading=ft.Icon(ft.icons.FORK_LEFT_ROUNDED),
             title=ft.Text("First solution strategy"),
-            subtitle=ft.Text("Select an algorithm used to find an initial solution."),
+            subtitle=ft.Text("Select the algorithm used to find an initial solution."),
         )
         first_solution_strategy_radio_group = ft.RadioGroup(
             value="LOCAL_CHEAPEST_INSERTION",
@@ -431,8 +432,8 @@ class SetupView:
             leading=ft.Icon(ft.icons.HUB_OUTLINED),
             title=ft.Text("Local search metaheuristic"),
             subtitle=ft.Text(
-                "Select a more advanced algorithm used "
-                "to optimize the initial solution.",
+                "Select the advanced algorithm used "
+                "to further optimize the initial solution.",
             ),
         )
         local_search_metaheuristic_radio_group = ft.RadioGroup(
