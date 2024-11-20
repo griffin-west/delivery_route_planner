@@ -30,7 +30,7 @@ class SetupView:
 
     def render(self) -> ft.Column:
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
-        reset_button = ft.FilledTonalButton("Reset defaults", ft.icons.UNDO_ROUNDED)
+        reset_button = ft.FilledTonalButton("Restore defaults", ft.icons.RESTORE_ROUNDED)
 
         header = ft.Container(
             ft.Row(
