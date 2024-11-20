@@ -1,9 +1,26 @@
+
+from typing import Callable, NamedTuple
+
 import flet as ft
 
+from delivery_route_planner.models import models
+
+
+class SolutionDialogs(NamedTuple):
+    progress: ft.AlertDialog
+    success: ft.AlertDialog
+    failure: ft.AlertDialog
 
 class NavigationManager:
-    def __init__(self, page: ft.Page) -> None:
+    def __init__(
+        self,
+        page: ft.Page,
+        data: models.DataModel,
+        solution_callback: Callable,
+    ) -> None:
         self.page = page
+        self.data = data
+        self.solution_callback = solution_callback
         self.views = {}
         self.view_names = []
         self.destinations = []
@@ -46,6 +63,7 @@ class NavigationManager:
             foreground_color=ft.colors.ON_PRIMARY,
             elevation=2,
             hover_elevation=4,
+            on_click=self.start_or_tools_solver,
         )
         solve_button_container = ft.Container(
             ft.Column(
@@ -72,4 +90,73 @@ class NavigationManager:
             indicator_color=ft.colors.INVERSE_PRIMARY,
             bgcolor=ft.colors.TRANSPARENT,
             on_change=self._navigate_from_selection,
+        )
+
+    def start_or_tools_solver(self, _e: ft.ControlEvent) -> None:
+        solver_dialogs = self._build_solution_dialogs()
+
+        self.page.open(solver_dialogs.progress)
+        solver_successful = self.solution_callback()
+
+        self.page.close(solver_dialogs.progress)
+        if solver_successful:
+            self._enable_view("routes")
+            self._enable_view("reports")
+            self.page.open(solver_dialogs.success)
+        else:
+            self.page.open(solver_dialogs.failure)
+
+        self.page.update()
+
+    def _enable_view(self, name: str) -> None:
+        for i, view_name in enumerate(self.view_names):
+            if view_name == name and self.navigation_rail.destinations:
+                self.navigation_rail.destinations[i].disabled = False
+        self.page.update()
+
+    def _build_solution_dialogs(self) -> SolutionDialogs:
+        solver_progress_dialog = ft.AlertDialog(
+            icon=ft.Icon(name=ft.icons.AUTO_AWESOME_ROUNDED),
+            title=ft.Text("Please wait..."),
+            content=ft.Column(
+                [
+                    ft.Text("Searching for routing solutions..."),
+                    ft.ProgressBar(border_radius=5),
+                ],
+                tight=True,
+            ),
+            modal=True,
+        )
+        solver_success_dialog = ft.AlertDialog(
+            icon=ft.Icon(name=ft.icons.CHECK_CIRCLE_ROUNDED),
+            title=ft.Text("Solution found"),
+            content=ft.Text(
+                "New routes have been created.\n"
+                "Please view them on the Routes and Reports pages."),
+            actions=[
+                ft.FilledTonalButton(
+                    text="Okay",
+                    on_click=lambda _: self.page.close(solver_success_dialog),
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        solver_failure_dialog = ft.AlertDialog(
+            icon=ft.Icon(name=ft.icons.ERROR_OUTLINE_ROUNDED, color=ft.colors.ERROR),
+            title=ft.Text("Solution not found", color=ft.colors.ERROR),
+            content=ft.Text(
+                "Routes could not be created.\n"
+                "Please adjust settings and try again."),
+            actions=[
+                ft.FilledTonalButton(
+                    text="Okay",
+                    on_click=lambda _: self.page.close(solver_failure_dialog),
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        return SolutionDialogs(
+            solver_progress_dialog,
+            solver_success_dialog,
+            solver_failure_dialog,
         )
