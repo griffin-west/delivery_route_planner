@@ -50,7 +50,7 @@ class DeliveryRoutePlanner:
                 return False
             self.solution = solution
             self.views["routes"].set_solution(self.solution)
-            # self.views["reports"].set_solution(self.solution)
+            self.views["reports"].set_solution(self.solution)
             return True
 
 

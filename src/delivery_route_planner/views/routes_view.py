@@ -156,7 +156,7 @@ class RoutesView:
                     subtitle=ft.Column(
                         [
                             ft.Text(
-                                f"Vehicle {route.vehicle.id}: {route.mileage} miles"
+                                f"Vehicle {route.vehicle.id}: {route.mileage} miles",
                             )
                             for route in self.solution.routes
                         ],
