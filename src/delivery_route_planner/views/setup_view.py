@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import flet as ft
 from ortools.constraint_solver.routing_enums_pb2 import (
     FirstSolutionStrategy,
@@ -6,8 +8,9 @@ from ortools.constraint_solver.routing_enums_pb2 import (
 
 from delivery_route_planner.models import models
 
-MINIMUM_SECONDS_RECOMMENDED = 60
-MINIMUM_SOLUTIONS_RECOMMENDED = 1000
+TIME_LIMIT_WARNING_THRESHOLD = 60
+SOLUTION_LIMIT_WARNING_THRESHOLD = 1000
+RESPONSIVE_ROW_BREAKPOINTS: dict[str, int | float] = {"sm": 12, "md": 6, "xxl": 4}
 
 
 class SetupView:
@@ -120,7 +123,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_packages_card(self) -> ft.Card:
@@ -153,7 +156,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_start_time_card(self) -> ft.Card:
@@ -208,7 +211,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_time_limit_card(self) -> ft.Card:
@@ -217,7 +220,7 @@ class SetupView:
             value = int(e.control.value)
             time_limit_callout.value = f"{value} seconds"
             self.data.settings.solver_time_limit_seconds = value
-            if value < MINIMUM_SECONDS_RECOMMENDED:
+            if value < TIME_LIMIT_WARNING_THRESHOLD:
                 time_limit_callout.color = ft.colors.ERROR
                 e.control.active_color = ft.colors.ERROR
             else:
@@ -259,7 +262,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_solution_limit_card(self) -> ft.Card:
@@ -268,7 +271,7 @@ class SetupView:
             value = int(e.control.value)
             solution_limit_callout.value = f"{value} solutions"
             self.data.settings.solver_solution_limit = value
-            if value < MINIMUM_SOLUTIONS_RECOMMENDED:
+            if value < SOLUTION_LIMIT_WARNING_THRESHOLD:
                 solution_limit_callout.color = ft.colors.ERROR
                 e.control.active_color = ft.colors.ERROR
             else:
@@ -283,7 +286,7 @@ class SetupView:
         )
         solution_limit_header = ft.ListTile(
             leading=ft.Icon(ft.icons.REFRESH_ROUNDED),
-            title=ft.Text("Solution iteration limit"),
+            title=ft.Text("Solution limit"),
             subtitle=ft.Text(
                 "More iterations will yield better results.",
             ),
@@ -310,7 +313,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_search_logging_card(self) -> ft.Card:
@@ -346,7 +349,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_first_solution_strategy_card(self) -> ft.Card:
@@ -424,7 +427,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_local_search_metaheuristic_card(self) -> ft.Card:
@@ -515,7 +518,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_requirements_card(self) -> ft.Card:
@@ -590,5 +593,5 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
-            col={"md": 12, "lg": 6, "xxl": 4},
+            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
