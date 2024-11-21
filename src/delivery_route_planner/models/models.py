@@ -322,7 +322,7 @@ class SearchSettings:
     penalty_scale_req_vehicle: int = 3
     penalty_scale_pickups: int = 2
     use_full_propagation: bool = True
-    use_search_logging: bool = True
+    use_search_logging: bool = False
     first_solution_strategy: OrToolsEnum = FSS.LOCAL_CHEAPEST_INSERTION
     local_search_metaheuristic: OrToolsEnum = LSM.GUIDED_LOCAL_SEARCH
     solver_time_limit_seconds: int | None = 120

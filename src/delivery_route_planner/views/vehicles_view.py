@@ -14,8 +14,6 @@ class VehiclesView:
         self.disabled = False
 
     def render(self) -> ft.Column:
-        if self.page.theme:
-            self.page.theme.color_scheme_seed = ft.colors.PINK_ACCENT_700
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         add_vehicle_dialog = ft.AlertDialog(
             icon=ft.Icon(ft.icons.LOCAL_SHIPPING_ROUNDED),

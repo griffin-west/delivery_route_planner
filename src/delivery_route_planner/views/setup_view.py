@@ -29,8 +29,6 @@ class SetupView:
         self.requirements_card = self.create_requirements_card()
 
     def render(self) -> ft.Column:
-        if self.page.theme:
-            self.page.theme.color_scheme_seed = ft.colors.BLUE
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         reset_button = ft.FilledTonalButton(
             "Restore defaults",
@@ -49,7 +47,7 @@ class SetupView:
         self.packages_card = self.create_packages_card()
 
         settings_row = ft.Container(
-            ft.Row(
+            ft.ResponsiveRow(
                 [
                     self.vehicles_card,
                     self.packages_card,
@@ -58,7 +56,6 @@ class SetupView:
                     self.solution_limit_card,
                     self.search_logging_card,
                 ],
-                wrap=True,
                 spacing=30,
                 run_spacing=30,
                 vertical_alignment=ft.CrossAxisAlignment.START,
@@ -66,13 +63,12 @@ class SetupView:
             padding=ft.padding.only(30, 0, 30, 30),
         )
         algorithms_row = ft.Container(
-            ft.Row(
+            ft.ResponsiveRow(
                 [
                     self.first_solution_card,
                     self.metaheuristic_card,
                     self.requirements_card,
                 ],
-                wrap=True,
                 spacing=30,
                 run_spacing=30,
                 vertical_alignment=ft.CrossAxisAlignment.START,
@@ -124,6 +120,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_packages_card(self) -> ft.Card:
@@ -156,6 +153,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_start_time_card(self) -> ft.Card:
@@ -210,6 +208,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_time_limit_card(self) -> ft.Card:
@@ -260,6 +259,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_solution_limit_card(self) -> ft.Card:
@@ -310,6 +310,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_search_logging_card(self) -> ft.Card:
@@ -345,6 +346,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_first_solution_strategy_card(self) -> ft.Card:
@@ -422,6 +424,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_local_search_metaheuristic_card(self) -> ft.Card:
@@ -512,6 +515,7 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )
 
     def create_requirements_card(self) -> ft.Card:
@@ -586,4 +590,5 @@ class SetupView:
             ),
             variant=ft.CardVariant.FILLED,
             width=400,
+            col={"md": 12, "lg": 6, "xxl": 4},
         )

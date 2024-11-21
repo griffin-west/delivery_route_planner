@@ -13,8 +13,6 @@ class RoutesView:
         self.disabled = True
 
     def render(self) -> ft.Column:
-        if self.page.theme:
-            self.page.theme.color_scheme_seed = ft.colors.LIGHT_GREEN_ACCENT
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         save_as_file_dialog = ft.AlertDialog(
             icon=ft.Icon(ft.icons.SAVE_AS_ROUNDED),
@@ -156,14 +154,15 @@ class RoutesView:
                     subtitle=ft.Column(
                         [
                             ft.Text(
-                                f"Vehicle {route.vehicle.id}: {route.mileage} miles",
+                                f"Vehicle {route.vehicle.id}: "
+                                f"{round(route.mileage, 1)} miles",
                             )
                             for route in self.solution.routes
                         ],
                         spacing=0,
                     ),
                     trailing=ft.Text(
-                        f"{self.solution.mileage} miles",
+                        f"{round(self.solution.mileage, 1)} miles",
                         style=ft.TextThemeStyle.TITLE_LARGE,
                     ),
                 ),
