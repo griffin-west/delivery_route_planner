@@ -10,8 +10,6 @@ from delivery_route_planner.models import models
 
 TIME_LIMIT_WARNING_THRESHOLD = 60
 SOLUTION_LIMIT_WARNING_THRESHOLD = 1000
-RESPONSIVE_ROW_BREAKPOINTS: dict[str, int | float] = {"sm": 12, "md": 6, "xxl": 4}
-
 
 class SetupView:
     def __init__(self, page: ft.Page, data: models.DataModel) -> None:
@@ -111,19 +109,13 @@ class SetupView:
             ft.Text("*Work in progress.\nVehicles cannot be modified at this time."),
             padding=ft.padding.only(20, 0, 20, 10),
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        vehicles_header,
-                        vehicles_disclaimer,
-                    ],
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    vehicles_header,
+                    vehicles_disclaimer,
+                ],
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_packages_card(self) -> ft.Card:
@@ -144,19 +136,13 @@ class SetupView:
             ft.Text("*Work in progress.\nPackages cannot be modified at this time."),
             padding=ft.padding.only(20, 0, 20, 10),
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        packages_header,
-                        packages_disclaimer,
-                    ],
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    packages_header,
+                    packages_disclaimer,
+                ],
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_start_time_card(self) -> ft.Card:
@@ -198,20 +184,14 @@ class SetupView:
             ),
             padding=ft.padding.only(0, 0, 20, 10),
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        start_time_header,
-                        start_time_button,
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.END,
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    start_time_header,
+                    start_time_button,
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.END,
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_time_limit_card(self) -> ft.Card:
@@ -250,19 +230,13 @@ class SetupView:
             inactive_color=ft.colors.OUTLINE_VARIANT,
             on_change=time_limit_change,
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        time_limit_header,
-                        time_limit_slider,
-                    ],
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    time_limit_header,
+                    time_limit_slider,
+                ],
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_solution_limit_card(self) -> ft.Card:
@@ -301,19 +275,13 @@ class SetupView:
             inactive_color=ft.colors.OUTLINE_VARIANT,
             on_change=solution_limit_change,
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        solution_limit_header,
-                        solution_limit_slider,
-                    ],
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    solution_limit_header,
+                    solution_limit_slider,
+                ],
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_search_logging_card(self) -> ft.Card:
@@ -336,20 +304,14 @@ class SetupView:
             ),
             padding=ft.padding.only(0, 0, 20, 10),
         )
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        logging_header,
-                        logging_switch,
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.END,
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    logging_header,
+                    logging_switch,
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.END,
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
 
     def create_first_solution_strategy_card(self) -> ft.Card:
@@ -420,15 +382,7 @@ class SetupView:
                 ],
             ),
         )
-        return ft.Card(
-            ft.Container(
-                first_solution_strategy_radio_group,
-                padding=10,
-            ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
-        )
+        return SettingsCard(first_solution_strategy_radio_group)
 
     def create_local_search_metaheuristic_card(self) -> ft.Card:
 
@@ -511,15 +465,7 @@ class SetupView:
                 ],
             ),
         )
-        return ft.Card(
-            ft.Container(
-                local_search_metaheuristic_radio_group,
-                padding=10,
-            ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
-        )
+        return SettingsCard(local_search_metaheuristic_radio_group)
 
     def create_requirements_card(self) -> ft.Card:
         requirements_header = ft.ListTile(
@@ -581,17 +527,19 @@ class SetupView:
             padding=ft.padding.only(10, 0, 10, 10),
         )
 
-        return ft.Card(
-            ft.Container(
-                ft.Column(
-                    [
-                        requirements_header,
-                        requirements_toggles,
-                    ],
-                ),
-                padding=10,
+        return SettingsCard(
+            ft.Column(
+                [
+                    requirements_header,
+                    requirements_toggles,
+                ],
             ),
-            variant=ft.CardVariant.FILLED,
-            width=400,
-            col=RESPONSIVE_ROW_BREAKPOINTS,
         )
+
+class SettingsCard(ft.Card):
+    def __init__(self, content: ft.Control) -> None:
+        super().__init__()
+        self.content = ft.Container(content, padding=10)
+        self.variant = ft.CardVariant.FILLED
+        self.col = {"sm": 12, "md": 6, "xxl": 4}
+        self.animate_size = ft.Animation(300, ft.AnimationCurve.EASE_OUT_CIRC)
