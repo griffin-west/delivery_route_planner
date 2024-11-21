@@ -30,8 +30,15 @@ class NavigationManager:
             bgcolor=ft.colors.SURFACE,
             border_radius=15,
             border=ft.border.all(1, ft.colors.SURFACE_VARIANT),
+            offset=ft.transform.Offset(0, 0),
+            animate_offset=ft.Animation(150, ft.AnimationCurve.DECELERATE),
+            on_animation_end=self.move_container_back,
             expand=True,
         )
+
+    def move_container_back(self, _e: ft.ControlEvent) -> None:
+        self.view_container.offset = ft.transform.Offset(0,0)
+        self.page.update()
 
     def render(self) -> ft.Row:
         return ft.Row(
@@ -53,6 +60,7 @@ class NavigationManager:
 
     def _navigate_from_selection(self, e: ft.ControlEvent) -> None:
         selected_view_name = self.view_names[e.control.selected_index]
+        self.view_container.offset = ft.transform.Offset(0, -0.015)
         self.view_container.content = self.views[selected_view_name].render()
         self.page.update()
 
@@ -98,6 +106,8 @@ class NavigationManager:
         self.page.open(solver_dialogs.progress)
         solver_successful = self.solution_callback()
 
+        self.page.window.minimized = False
+        self.page.window.to_front()
         self.page.close(solver_dialogs.progress)
         if solver_successful:
             self._enable_view("routes")
