@@ -14,7 +14,30 @@ class RoutesView:
 
     def render(self) -> ft.Column:
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
-        header = ft.Container(title, padding=30)
+        save_as_file_dialog = ft.AlertDialog(
+            icon=ft.Icon(ft.icons.SAVE_AS_ROUNDED),
+            title=ft.Text("Save routes as file", text_align=ft.TextAlign.CENTER),
+            actions_alignment=ft.MainAxisAlignment.END,
+            content=ft.Text("This feature is not yet available."),
+            actions=[
+                ft.TextButton(
+                    "Close",
+                    on_click=lambda _: self.page.close(save_as_file_dialog),
+                ),
+            ],
+        )
+        save_as_file_button = ft.FilledTonalButton(
+            "Save as file",
+            ft.icons.SAVE_AS_OUTLINED,
+            on_click=lambda _: self.page.open(save_as_file_dialog),
+        )
+        header = ft.Container(
+            ft.Row(
+                [title, save_as_file_button],
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            ),
+            padding=30,
+        )
         body = ft.Column(
             controls=[self._build_route_tables()],
             scroll=ft.ScrollMode.AUTO,
@@ -30,52 +53,74 @@ class RoutesView:
         self.solution = solution
 
     def _build_route_tables(self) -> ft.Container:
-        route_stops = []
-        route_table = ft.DataTable(
-            columns=[
-                ft.DataColumn(label=ft.Text("Vehicle ID")),
-                ft.DataColumn(label=ft.Text("Route Stop")),
-                ft.DataColumn(label=ft.Text("State")),
-                ft.DataColumn(label=ft.Text("Zip Code")),
-            ],
-            rows=route_stops,
-            heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD),
-            border_radius=15,
-            border=ft.border.all(2, ft.colors.OUTLINE_VARIANT),
-            vertical_lines=ft.BorderSide(1, ft.colors.OUTLINE_VARIANT),
-            clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
-            show_checkbox_column=True,
-        )
-
-        def row_selected(e: ft.ControlEvent) -> None:
-            e.control.selected = not e.control.selected
-            self.page.update()
-
-        address_rows.extend(
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(
-                        ft.Text(address.street),
-                        placeholder=address.street == "Depot",
-                    ),
-                    ft.DataCell(ft.Text(address.city)),
-                    ft.DataCell(ft.Text(address.state)),
-                    ft.DataCell(ft.Text(address.zip_code)),
+        if not self.solution:
+            return ft.Container()
+        route_tables = []
+        
+        for route in self.solution.routes:
+            route_steps = []
+            route_table = ft.DataTable(
+                columns=[
+                    ft.DataColumn(label=ft.Text("Step"), numeric=True),
+                    ft.DataColumn(label=ft.Text("Address")),
+                    ft.DataColumn(label=ft.Text("Activity")),
+                    ft.DataColumn(label=ft.Text("Package ID(s)")),
+                    ft.DataColumn(label=ft.Text("Load"), numeric=True),
+                    ft.DataColumn(label=ft.Text("Mileage"), numeric=True),
+                    ft.DataColumn(label=ft.Text("Time")),
                 ],
-                on_select_changed=row_selected,
-                selected=True,
+                rows=route_steps,
+                heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD),
+                border_radius=15,
+                border=ft.border.all(2, ft.colors.OUTLINE_VARIANT),
+                vertical_lines=ft.BorderSide(1, ft.colors.OUTLINE_VARIANT),
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             )
-            for address in self.data.addresses.values()
-        )
-        return ft.Container(
-            content=ft.Column(
-                [
-                    address_table,
-                    ft.Text(
-                        "*Work in progress. Row selection currently has no effect.",
-                    ),
-                ],
-            ),
-            padding=ft.padding.only(30, 0, 30, 30),
-        )
 
+            step = 0
+            packages = []
+            for this_stop, next_stop in zip(route.stops[1:], route.stops[2:] + [None]):
+                if this_stop.node.package:
+                    packages.append(this_stop.node.package.id)
+                if (
+                    next_stop
+                    and this_stop.node.kind == next_stop.node.kind
+                    and this_stop.node.address == next_stop.node.address
+                ):
+                    continue
+                activity = (
+                    this_stop.node.kind.description
+                    if this_stop.node.kind != models.NodeKind.ORIGIN
+                    else "End"
+                )
+                route_steps.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(str(step))),
+                            ft.DataCell(ft.Text(this_stop.node.address)),
+                            ft.DataCell(ft.Text(activity)),
+                            ft.DataCell(ft.Text(str(packages)[1:-1])),
+                            ft.DataCell(ft.Text(str(this_stop.vehicle_load))),
+                            ft.DataCell(ft.Text(str(round(this_stop.mileage, 1)))),
+                            ft.DataCell(ft.Text(str(this_stop.visit_time))),
+                        ],
+                        selected=this_stop.node.kind != models.NodeKind.DELIVERY,
+                    ),
+                )
+                step = step + 1
+                packages.clear()
+
+            route_tables.extend(
+                [
+                    ft.Text(
+                        f"Route for Vehicle {route.vehicle.id}",
+                        style=ft.TextThemeStyle.TITLE_LARGE,
+                    ),
+                    route_table,
+                    ft.Container(height=30),
+                ],
+            )
+        return ft.Container(
+            content=ft.Column(route_tables),
+            padding=ft.padding.symmetric(0, 30),
+        )

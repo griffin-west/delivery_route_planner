@@ -1,4 +1,3 @@
-
 from typing import Callable, NamedTuple
 
 import flet as ft
@@ -10,6 +9,7 @@ class SolutionDialogs(NamedTuple):
     progress: ft.AlertDialog
     success: ft.AlertDialog
     failure: ft.AlertDialog
+
 
 class NavigationManager:
     def __init__(
@@ -132,7 +132,8 @@ class NavigationManager:
             title=ft.Text("Solution found"),
             content=ft.Text(
                 "New routes have been created.\n"
-                "Please view them on the Routes and Reports pages."),
+                "Please view them on the Routes and Reports pages."
+            ),
             actions=[
                 ft.FilledTonalButton(
                     text="Okay",
@@ -145,8 +146,8 @@ class NavigationManager:
             icon=ft.Icon(name=ft.icons.ERROR_OUTLINE_ROUNDED, color=ft.colors.ERROR),
             title=ft.Text("Solution not found", color=ft.colors.ERROR),
             content=ft.Text(
-                "Routes could not be created.\n"
-                "Please adjust settings and try again."),
+                "Routes could not be created.\n" "Please adjust settings and try again."
+            ),
             actions=[
                 ft.FilledTonalButton(
                     text="Okay",

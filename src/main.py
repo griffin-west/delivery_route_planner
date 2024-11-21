@@ -16,7 +16,9 @@ class DeliveryRoutePlanner:
         self.window_manager = components.WindowManager(page)
         self.title_bar = components.TitleBar(page)
         self.navigation_manager = components.NavigationManager(
-            page, self.data, solution_callback=self.create_solution,
+            page,
+            self.data,
+            solution_callback=self.create_solution,
         )
         self.views = {
             "setup": views.SetupView(page, self.data),
@@ -41,15 +43,16 @@ class DeliveryRoutePlanner:
         except Exception as e:
             if isinstance(e, (KeyboardInterrupt, SystemExit)):
                 raise
-            logging.exception("An unexpected error occurred within Google OR-Tools.")
+            logging.exception("An unexpected error occurred with Google OR-Tools.")
             return False
         else:
             if solution is None or solution.delivered_packages_count == 0:
                 return False
             self.solution = solution
             self.views["routes"].set_solution(self.solution)
-            self.views["reports"].set_solution(self.solution)
+            # self.views["reports"].set_solution(self.solution)
             return True
+
 
 def main(page: ft.Page) -> None:
     DeliveryRoutePlanner(page)
