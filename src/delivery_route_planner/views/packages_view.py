@@ -13,6 +13,8 @@ class PackagesView:
         self.disabled = False
 
     def render(self) -> ft.Column:
+        if self.page.theme:
+            self.page.theme.color_scheme_seed = ft.colors.ORANGE
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         add_package_dialog = ft.AlertDialog(
             icon=ft.Icon(ft.icons.INVENTORY_2_ROUNDED),

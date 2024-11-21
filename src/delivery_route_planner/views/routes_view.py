@@ -13,6 +13,8 @@ class RoutesView:
         self.disabled = True
 
     def render(self) -> ft.Column:
+        if self.page.theme:
+            self.page.theme.color_scheme_seed = ft.colors.LIGHT_GREEN_ACCENT
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         save_as_file_dialog = ft.AlertDialog(
             icon=ft.Icon(ft.icons.SAVE_AS_ROUNDED),
@@ -55,8 +57,8 @@ class RoutesView:
     def _build_route_tables(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
-        route_tables = []
-        
+
+        route_tables = ft.Column()
         for route in self.solution.routes:
             route_steps = []
             route_table = ft.DataTable(
@@ -77,7 +79,7 @@ class RoutesView:
                 clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             )
 
-            step = 0
+            step = 1
             packages = []
             for this_stop, next_stop in zip(route.stops[1:], route.stops[2:] + [None]):
                 if this_stop.node.package:
@@ -93,15 +95,21 @@ class RoutesView:
                     if this_stop.node.kind != models.NodeKind.ORIGIN
                     else "End"
                 )
+                packages_str = str(packages)[1:-1]
+                if len(packages_str) == 0:
+                    packages_str = "None"
                 route_steps.append(
                     ft.DataRow(
                         cells=[
                             ft.DataCell(ft.Text(str(step))),
                             ft.DataCell(ft.Text(this_stop.node.address)),
                             ft.DataCell(ft.Text(activity)),
-                            ft.DataCell(ft.Text(str(packages)[1:-1])),
+                            ft.DataCell(
+                                ft.Text(packages_str),
+                                placeholder=packages_str == "None",
+                            ),
                             ft.DataCell(ft.Text(str(this_stop.vehicle_load))),
-                            ft.DataCell(ft.Text(str(round(this_stop.mileage, 1)))),
+                            ft.DataCell(ft.Text(str(round(this_stop.mileage, 2)))),
                             ft.DataCell(ft.Text(str(this_stop.visit_time))),
                         ],
                         selected=this_stop.node.kind != models.NodeKind.DELIVERY,
@@ -110,17 +118,112 @@ class RoutesView:
                 step = step + 1
                 packages.clear()
 
-            route_tables.extend(
+            unused_vehicle_message = ft.Card(
+                ft.Container(
+                    ft.ListTile(
+                        leading=ft.Icon(ft.icons.INFO_ROUNDED),
+                        title=ft.Text("This is not an error."),
+                        subtitle=ft.Text(
+                            "It is possible for the algorithm to optimize "
+                            "total mileage by utilizing only one vehicle.",
+                        ),
+                        content_padding=0,
+                    ),
+                    padding=ft.padding.symmetric(0, 20),
+                ),
+                variant=ft.CardVariant.FILLED,
+                width=650,
+                visible=route.mileage == 0,
+            )
+
+            route_tables.controls.extend(
                 [
                     ft.Text(
                         f"Route for Vehicle {route.vehicle.id}",
-                        style=ft.TextThemeStyle.TITLE_LARGE,
+                        style=ft.TextThemeStyle.TITLE_MEDIUM,
                     ),
                     route_table,
+                    unused_vehicle_message,
                     ft.Container(height=30),
                 ],
             )
+
+        total_mileage_card = ft.Card(
+            ft.Container(
+                ft.ListTile(
+                    leading=ft.Icon(ft.icons.SPEED_ROUNDED),
+                    title=ft.Text("Total mileage"),
+                    subtitle=ft.Column(
+                        [
+                            ft.Text(
+                                f"Vehicle {route.vehicle.id}: {route.mileage} miles"
+                            )
+                            for route in self.solution.routes
+                        ],
+                        spacing=0,
+                    ),
+                    trailing=ft.Text(
+                        f"{self.solution.mileage} miles",
+                        style=ft.TextThemeStyle.TITLE_LARGE,
+                    ),
+                ),
+                padding=10,
+            ),
+            variant=ft.CardVariant.FILLED,
+            width=400,
+        )
+
+        delivered_count = self.solution.delivered_packages_count
+        missed_count = self.solution.missed_packages_count
+        missed_packages = str(self.solution.missed_packages)[1:-1]
+
+        delivery_success_card = ft.Card(
+            ft.Container(
+                ft.ListTile(
+                    leading=ft.Icon(ft.icons.INVENTORY_2_OUTLINED),
+                    title=ft.Text("Delivery success"),
+                    subtitle=ft.Column(
+                        [
+                            ft.Text(f"Packages delivered: {delivered_count}"),
+                            ft.Text(f"Packages missed: {missed_count}"),
+                            ft.Text(
+                                f"Missed packages: {missed_packages}",
+                                visible=missed_count > 0,
+                            ),
+                        ],
+                        spacing=0,
+                    ),
+                    trailing=ft.Text(
+                        self.solution.delivery_percentage,
+                        style=ft.TextThemeStyle.TITLE_LARGE,
+                    ),
+                ),
+                padding=10,
+            ),
+            variant=ft.CardVariant.FILLED,
+            width=400,
+        )
+
+        card_row = ft.Container(
+            ft.Row(
+                [
+                    total_mileage_card,
+                    delivery_success_card,
+                ],
+                wrap=True,
+                spacing=30,
+                run_spacing=30,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+            ),
+        )
+
         return ft.Container(
-            content=ft.Column(route_tables),
+            content=ft.Column(
+                [
+                    card_row,
+                    route_tables,
+                ],
+                spacing=30,
+            ),
             padding=ft.padding.symmetric(0, 30),
         )

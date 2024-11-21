@@ -10,6 +10,8 @@ class ReportsView:
         self.disabled = True
 
     def render(self) -> ft.Column:
+        if self.page.theme:
+            self.page.theme.color_scheme_seed = ft.colors.DEEP_PURPLE
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         header = ft.Container(
             ft.Row(

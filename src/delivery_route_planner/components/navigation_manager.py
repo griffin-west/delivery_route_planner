@@ -128,11 +128,11 @@ class NavigationManager:
             modal=True,
         )
         solver_success_dialog = ft.AlertDialog(
-            icon=ft.Icon(name=ft.icons.CHECK_CIRCLE_ROUNDED),
+            icon=ft.Icon(name=ft.icons.CHECK_CIRCLE_OUTLINE_ROUNDED),
             title=ft.Text("Solution found"),
             content=ft.Text(
                 "New routes have been created.\n"
-                "Please view them on the Routes and Reports pages."
+                "Please view them on the Routes and Reports pages.",
             ),
             actions=[
                 ft.FilledTonalButton(
@@ -146,7 +146,7 @@ class NavigationManager:
             icon=ft.Icon(name=ft.icons.ERROR_OUTLINE_ROUNDED, color=ft.colors.ERROR),
             title=ft.Text("Solution not found", color=ft.colors.ERROR),
             content=ft.Text(
-                "Routes could not be created.\n" "Please adjust settings and try again."
+                "Routes could not be created.\nPlease adjust settings and try again.",
             ),
             actions=[
                 ft.FilledTonalButton(

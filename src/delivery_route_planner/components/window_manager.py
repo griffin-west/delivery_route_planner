@@ -55,8 +55,5 @@ class WindowManager:
             "Roboto": "fonts/Roboto-Regular.ttf",
             "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
         }
-        self.page.theme = ft.Theme(
-            font_family="Outfit",
-            color_scheme_seed=ft.colors.LIGHT_GREEN_ACCENT,
-        )
+        self.page.theme = ft.Theme(font_family="Outfit")
         self.page.bgcolor = ft.colors.ON_INVERSE_SURFACE

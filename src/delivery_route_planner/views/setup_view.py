@@ -29,9 +29,12 @@ class SetupView:
         self.requirements_card = self.create_requirements_card()
 
     def render(self) -> ft.Column:
+        if self.page.theme:
+            self.page.theme.color_scheme_seed = ft.colors.BLUE
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
         reset_button = ft.FilledTonalButton(
-            "Restore defaults", ft.icons.RESTORE_ROUNDED
+            "Restore defaults",
+            ft.icons.RESTORE_ROUNDED,
         )
 
         header = ft.Container(
