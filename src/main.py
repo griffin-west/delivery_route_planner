@@ -26,7 +26,7 @@ class DeliveryRoutePlanner:
             "vehicles": views.VehiclesView(page, self.data),
             "addresses": views.AddressesView(page, self.data),
             "routes": views.RoutesView(page),
-            "reports": views.ReportsView(page),
+            "charts": views.ChartsView(page),
         }
 
         self.navigation_manager.set_views(self.views)
@@ -50,7 +50,7 @@ class DeliveryRoutePlanner:
                 return False
             self.solution = solution
             self.views["routes"].set_solution(self.solution)
-            self.views["reports"].set_solution(self.solution)
+            self.views["charts"].set_solution(self.solution)
             return True
 
 
