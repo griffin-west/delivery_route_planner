@@ -118,10 +118,19 @@ class NavigationManager:
 
     def _build_solution_dialogs(self) -> SolutionDialogs:
         solver_progress_dialog = ft.AlertDialog(
-            icon=ft.Icon(name=ft.icons.AUTO_AWESOME_ROUNDED),
             title=ft.Text("Please wait..."),
             content=ft.Column(
                 [
+                    ft.Container(
+                        ft.Lottie(
+                            src="animations/routing-loading.json",
+                            reverse=False,
+                            animate=True,
+                            fit=ft.ImageFit.FIT_HEIGHT,
+                        ),
+                        height=250,
+                        width=300,
+                    ),
                     ft.Text("Searching for routing solutions..."),
                     ft.ProgressBar(border_radius=5),
                 ],
