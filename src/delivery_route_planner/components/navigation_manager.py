@@ -131,7 +131,7 @@ class NavigationManager:
                         height=250,
                         width=300,
                     ),
-                    ft.Text("Searching for routing solutions..."),
+                    ft.Text("Planning delivery routes..."),
                     ft.ProgressBar(border_radius=5),
                 ],
                 tight=True,

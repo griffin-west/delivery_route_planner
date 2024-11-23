@@ -115,11 +115,14 @@ class PackagesView:
         return ft.Container(
             content=ft.Column(
                 [
-                    package_table,
+                    ft.Row(
+                        [package_table, ft.Container(width=30)],
+                        scroll=ft.ScrollMode.AUTO,
+                    ),
                     ft.Text(
                         "*Work in progress. Row selection currently has no effect.",
                     ),
                 ],
             ),
-            padding=ft.padding.only(30, 0, 30, 30),
+            padding=ft.padding.only(30, 0, 0, 30),
         )

@@ -11,6 +11,7 @@ from delivery_route_planner.models import models
 TIME_LIMIT_WARNING_THRESHOLD = 60
 SOLUTION_LIMIT_WARNING_THRESHOLD = 1000
 
+
 class SetupView:
     def __init__(self, page: ft.Page, data: models.DataModel) -> None:
         self.page = page
@@ -535,6 +536,7 @@ class SetupView:
                 ],
             ),
         )
+
 
 class SettingsCard(ft.Card):
     def __init__(self, content: ft.Control) -> None:

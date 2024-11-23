@@ -169,7 +169,7 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=400,
+            width=350,
         )
 
         delivered_count = self.solution.delivered_packages_count
@@ -200,7 +200,7 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=400,
+            width=350,
         )
 
         card_row = ft.Container(
@@ -220,9 +220,12 @@ class RoutesView:
             content=ft.Column(
                 [
                     card_row,
-                    route_tables,
+                    ft.Row(
+                        [route_tables, ft.Container(width=30)],
+                        scroll=ft.ScrollMode.AUTO,
+                    ),
                 ],
                 spacing=30,
             ),
-            padding=ft.padding.symmetric(0, 30),
+            padding=ft.padding.only(30, 0, 0, 0),
         )

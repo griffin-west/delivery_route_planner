@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import csv
+import datetime
 from dataclasses import dataclass, field
-from datetime import time
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, TypeAlias
@@ -145,7 +145,7 @@ class RoutingTime:
         return self.time.strftime("%I:%M:%S %p").lstrip("0").lower()
 
     @classmethod
-    def from_time(cls, t: time) -> RoutingTime:
+    def from_time(cls, t: datetime.time) -> RoutingTime:
         total_seconds = t.hour * SECONDS_PER_HOUR + t.minute * 60 + t.second
         return cls(total_seconds)
 
@@ -156,20 +156,26 @@ class RoutingTime:
     @classmethod
     def from_isoformat(cls, value: str) -> RoutingTime | None:
         try:
-            return cls.from_time(time.fromisoformat(value))
+            return cls.from_time(datetime.time.fromisoformat(value))
         except (ValueError, TypeError):
             return None
 
     @property
-    def time(self) -> time:
+    def time(self) -> datetime.time:
         hours = self._total_seconds // SECONDS_PER_HOUR
         minutes = (self._total_seconds % SECONDS_PER_HOUR) // 60
         seconds = self._total_seconds % 60
-        return time(hours, minutes, seconds)
+        return datetime.time(hours, minutes, seconds)
 
     @property
     def seconds(self) -> int:
         return self._total_seconds
+
+    @property
+    def datetime(self) -> datetime.datetime:
+        return datetime.datetime.combine(
+            datetime.datetime.now(tz=datetime.UTC), self.time,
+        )
 
     @property
     def short_str(self) -> str:
@@ -191,6 +197,9 @@ class Package:
     delivery_deadline: RoutingTime | None = None
     vehicle_requirement: Vehicle | None = None
     bundled_packages: list[Package] = field(default_factory=list)
+    shipped_time: RoutingTime | None = None
+    delivered_time: RoutingTime | None = None
+    vehicle_used: Vehicle | None = None
 
     @classmethod
     def from_csv(cls, addresses: AddressDict, vehicles: VehicleDict) -> PackageDict:
@@ -302,10 +311,10 @@ class OptimizationType(Enum):
 @dataclass
 class RoutingScenario:
     day_start: RoutingTime = field(
-        default_factory=lambda: RoutingTime.from_time(time(8)),
+        default_factory=lambda: RoutingTime.from_time(datetime.time(8)),
     )
     day_end: RoutingTime = field(
-        default_factory=lambda: RoutingTime.from_time(time(18)),
+        default_factory=lambda: RoutingTime.from_time(datetime.time(18)),
     )
     vehicle_count: int = 2
     vehicle_speed_mph: float = 18.0
@@ -402,6 +411,13 @@ class Route:
                     router.GetArcCostForVehicle(previous_index, index, vehicle.index)
                     / MILEAGE_SCALE_FACTOR
                 )
+
+            if node.kind == NodeKind.PICKUP:
+                node.package.shipped_time = visit_time
+                node.package.vehicle_used = vehicle
+            elif node.kind == NodeKind.DELIVERY:
+                node.package.delivered_time = visit_time
+
             return Stop(node, vehicle_load, visit_time, mileage)
 
         previous_index = None
