@@ -8,8 +8,8 @@ class ChartsView:
         self.page = page
         self.solution = None
         self.title = "Charts"
-        self.icon = ft.icons.BAR_CHART_ROUNDED
-        self.selected_icon = ft.icons.BAR_CHART_ROUNDED
+        self.icon = ft.icons.INSERT_CHART_OUTLINED_ROUNDED
+        self.selected_icon = ft.icons.INSERT_CHART_ROUNDED
         self.disabled = True
 
     def render(self) -> ft.Column:

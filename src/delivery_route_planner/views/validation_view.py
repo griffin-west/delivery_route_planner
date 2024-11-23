@@ -8,8 +8,8 @@ class ValidationView:
         self.page = page
         self.solution = None
         self.title = "Validation"
-        self.icon = ft.icons.RULE_OUTLINED
-        self.selected_icon = ft.icons.RULE_ROUNDED
+        self.icon = ft.icons.CHECK_CIRCLE_OUTLINE_ROUNDED
+        self.selected_icon = ft.icons.CHECK_CIRCLE_ROUNDED
         self.disabled = True
 
     def render(self) -> ft.Column:
