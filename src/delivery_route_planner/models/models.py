@@ -403,7 +403,7 @@ class Route:
             nonlocal vehicle_load, mileage
             node = data.nodes[manager.IndexToNode(index)]
             vehicle_load += node.kind.capacity_impact
-            route_seconds = assignments.Min(time_dimension.CumulVar(index))
+            route_seconds = assignments.Max(time_dimension.CumulVar(index))
             visit_time = RoutingTime.from_seconds(
                 data.scenario.day_start.seconds + route_seconds,
             )
@@ -443,8 +443,20 @@ class Route:
         return self.stops[-1].mileage if self.stops else 0.0
 
     @property
+    def start_time(self) -> RoutingTime | None:
+        return self.stops[1].visit_time if self.stops else None
+
+    @property
     def end_time(self) -> RoutingTime | None:
         return self.stops[-1].visit_time if self.stops else None
+
+    @property
+    def time_used_seconds(self) -> int:
+        return (
+            self.start_time.duration_until(self.end_time)
+            if self.start_time and self.end_time
+            else 0
+        )
 
 
 @dataclass
@@ -487,6 +499,12 @@ class Solution:
             max_time = max(route_times)
             return RoutingTime.from_seconds(max_time)
         return None
+
+    @property
+    def time_used_seconds(self) -> int:
+        return sum(
+            route.time_used_seconds for route in self.routes if route.time_used_seconds
+        )
 
     @property
     def delivered_packages(self) -> PackageDict:

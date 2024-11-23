@@ -58,9 +58,98 @@ class ChartsView:
         if not self.solution:
             return ft.Container()
 
+        mileage_pie = ft.PieChart(
+            sections=[
+                ft.PieChartSection(
+                    (route.mileage / self.solution.mileage * 100),
+                    title=f"Vehicle {route.vehicle.id}\n"
+                    f"{round(route.mileage / self.solution.mileage * 100, 1)}%\n"
+                    f"{round(route.mileage, 1)} miles",
+                    title_style=ft.TextStyle(color=ft.colors.ON_PRIMARY),
+                    color=(
+                        ft.colors.PRIMARY
+                        if route.vehicle.id == 1
+                        else ft.colors.TERTIARY
+                    ),
+                    radius=150,
+                )
+                for route in self.solution.routes
+            ],
+            center_space_radius=0,
+            start_degree_offset=180,
+        )
+
+        mileage_pie_card = ft.Card(
+            content=ft.Container(
+                ft.Column(
+                    [
+                        ft.Text(
+                            "Vehicle Utilization by Mileage",
+                            style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        ),
+                        mileage_pie,
+                    ],
+                    spacing=20,
+                ),
+                padding=20,
+                width=400,
+            ),
+            variant=ft.CardVariant.FILLED,
+        )
+
+        def time_label(seconds: int) -> str:
+            hours = seconds // 3600
+            minutes = (seconds % 3600) // 60
+            hour_str = "hour" if hours == 1 else "hours"
+            minute_str = "minute" if minutes == 1 else "minutes"
+            return f"{hours} {hour_str} and\n{minutes} {minute_str}"
+
+        time_pie = ft.PieChart(
+            sections=[
+                ft.PieChartSection(
+                    (route.time_used_seconds / self.solution.time_used_seconds * 100),
+                    title=f"Vehicle {route.vehicle.id}\n"
+                    f"{round(route.time_used_seconds / self.solution.time_used_seconds * 100, 1)}%\n"
+                    f"{time_label(route.time_used_seconds)}",
+                    title_style=ft.TextStyle(color=ft.colors.ON_PRIMARY),
+                    color=(
+                        ft.colors.PRIMARY
+                        if route.vehicle.id == 1
+                        else ft.colors.TERTIARY
+                    ),
+                    radius=150,
+                )
+                for route in self.solution.routes
+            ],
+            center_space_radius=0,
+            start_degree_offset=180,
+        )
+
+        time_pie_card = ft.Card(
+            content=ft.Container(
+                ft.Column(
+                    [
+                        ft.Text(
+                            "Vehicle Utilization by Time",
+                            style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        ),
+                        time_pie,
+                    ],
+                    spacing=20,
+                ),
+                padding=20,
+                width=400,
+            ),
+            variant=ft.CardVariant.FILLED,
+        )
+
         return ft.Container(
             content=ft.Row(
-                [],
+                [
+                    mileage_pie_card,
+                    time_pie_card,
+                    ft.Container(width=30),
+                ],
                 scroll=ft.ScrollMode.AUTO,
                 spacing=30,
             ),

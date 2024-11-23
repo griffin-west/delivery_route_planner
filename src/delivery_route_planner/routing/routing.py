@@ -89,8 +89,7 @@ def solve_vehicle_routing_problem(data: models.DataModel) -> models.Solution | N
         end_time = (
             node.package.delivery_deadline
             if node.package.delivery_deadline
-            and data.scenario.day_end.seconds
-            > node.package.delivery_deadline.seconds
+            and data.scenario.day_end.seconds > node.package.delivery_deadline.seconds
             else data.scenario.day_end
         )
         start_seconds = start_time.duration_after(data.scenario.day_start)

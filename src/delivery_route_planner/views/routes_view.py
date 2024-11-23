@@ -110,7 +110,7 @@ class RoutesView:
                             ft.DataCell(ft.Text(str(round(this_stop.mileage, 2)))),
                             ft.DataCell(ft.Text(str(this_stop.visit_time))),
                         ],
-                        selected=this_stop.node.kind != models.NodeKind.DELIVERY,
+                        selected=this_stop.node.kind == models.NodeKind.DELIVERY,
                     ),
                 )
                 step = step + 1

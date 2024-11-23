@@ -119,7 +119,7 @@ class NavigationManager:
 
     def _build_solution_dialogs(self) -> SolutionDialogs:
         solver_progress_dialog = ft.AlertDialog(
-            title=ft.Text("Please wait..."),
+            title=ft.Text("Please wait"),
             content=ft.Column(
                 [
                     ft.Container(
