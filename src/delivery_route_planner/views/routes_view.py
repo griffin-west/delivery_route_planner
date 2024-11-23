@@ -174,7 +174,7 @@ class RoutesView:
 
         delivered_count = self.solution.delivered_packages_count
         missed_count = self.solution.missed_packages_count
-        missed_packages = str(self.solution.missed_packages)[1:-1]
+        missed_packages = self.solution.missed_packages_str
 
         delivery_success_card = ft.Card(
             ft.Container(
@@ -186,7 +186,7 @@ class RoutesView:
                             ft.Text(f"Packages delivered: {delivered_count}"),
                             ft.Text(f"Packages missed: {missed_count}"),
                             ft.Text(
-                                f"Missed packages: {missed_packages}",
+                                f"Missed packages IDs:\n{missed_packages}",
                                 visible=missed_count > 0,
                             ),
                         ],
@@ -206,8 +206,9 @@ class RoutesView:
         card_row = ft.Container(
             ft.Row(
                 [
-                    total_mileage_card,
                     delivery_success_card,
+                    total_mileage_card,
+                    ft.Container(width=30),
                 ],
                 wrap=True,
                 spacing=30,

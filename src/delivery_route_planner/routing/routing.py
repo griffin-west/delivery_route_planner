@@ -73,17 +73,35 @@ def solve_vehicle_routing_problem(data: models.DataModel) -> models.Solution | N
         )
 
     for node_index, node in enumerate(data.nodes):
-        if node.kind == models.NodeKind.ORIGIN or not node.package:
+        if not node.package:
             continue
 
         index = manager.NodeToIndex(node_index)
-        start_time = node.package.shipping_availability or data.scenario.day_start
-        end_time = node.package.delivery_deadline or data.scenario.day_end
+        node_drop_penalty = data.settings.base_penalty
+
+        start_time = (
+            node.package.shipping_availability
+            if node.package.shipping_availability
+            and data.scenario.day_start.seconds
+            < node.package.shipping_availability.seconds
+            else data.scenario.day_start
+        )
+        end_time = (
+            node.package.delivery_deadline
+            if node.package.delivery_deadline
+            and data.scenario.day_end.seconds
+            > node.package.delivery_deadline.seconds
+            else data.scenario.day_end
+        )
         start_seconds = start_time.duration_after(data.scenario.day_start)
         end_seconds = end_time.duration_after(data.scenario.day_start)
-        time_dimension.CumulVar(index).SetRange(start_seconds, end_seconds)
-        node_drop_penalty = data.settings.base_penalty
-        node_drop_penalty *= day_duration / (end_seconds - start_seconds)
+        if end_seconds > start_seconds:
+            time_dimension.CumulVar(index).SetRange(start_seconds, end_seconds)
+            node_drop_penalty *= day_duration / (end_seconds - start_seconds)
+        else:
+            time_dimension.CumulVar(index).SetRange(0, 0)
+            node_drop_penalty = 0
+
         req_vehicle_index = node.package.required_vehicle_index
 
         if req_vehicle_index:

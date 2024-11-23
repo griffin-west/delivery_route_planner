@@ -12,14 +12,14 @@ TIME_LIMIT_WARNING_THRESHOLD = 60
 SOLUTION_LIMIT_WARNING_THRESHOLD = 1000
 
 
-class SetupView:
+class SettingsView:
     def __init__(self, page: ft.Page, data: models.DataModel) -> None:
         self.page = page
         self.data = data
 
-        self.title = "Setup"
-        self.icon = ft.icons.EDIT_OUTLINED
-        self.selected_icon = ft.icons.EDIT_ROUNDED
+        self.title = "Settings"
+        self.icon = ft.icons.SETTINGS_OUTLINED
+        self.selected_icon = ft.icons.SETTINGS_ROUNDED
         self.disabled = False
 
         self.start_time_card = self.create_start_time_card()
@@ -227,7 +227,7 @@ class SetupView:
             min=15,
             max=300,
             divisions=19,
-            label=" {value} seconds ",
+            label=" {value} ",
             inactive_color=ft.colors.OUTLINE_VARIANT,
             on_change=time_limit_change,
         )
@@ -243,8 +243,13 @@ class SetupView:
     def create_solution_limit_card(self) -> ft.Card:
 
         def solution_limit_change(e: ft.ControlEvent) -> None:
-            value = int(e.control.value)
-            solution_limit_callout.value = f"{value} solutions"
+            if e.control.value != 0:
+                value = int(e.control.value)
+                solution_limit_callout.value = f"{value} solutions"
+            else:
+                value = 1
+                solution_limit_callout.value = f"{value} solution"
+            e.control.label = f" {value} "
             self.data.settings.solver_solution_limit = value
             if value < SOLUTION_LIMIT_WARNING_THRESHOLD:
                 solution_limit_callout.color = ft.colors.ERROR
@@ -269,10 +274,9 @@ class SetupView:
         )
         solution_limit_slider = ft.Slider(
             value=self.data.settings.solver_solution_limit,
-            min=250,
+            min=0,
             max=5000,
-            divisions=19,
-            label=" {value} solutions ",
+            divisions=20,
             inactive_color=ft.colors.OUTLINE_VARIANT,
             on_change=solution_limit_change,
         )

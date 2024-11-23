@@ -315,7 +315,7 @@ class RoutingScenario:
         default_factory=lambda: RoutingTime.from_time(datetime.time(8)),
     )
     day_end: RoutingTime = field(
-        default_factory=lambda: RoutingTime.from_time(datetime.time(18)),
+        default_factory=lambda: RoutingTime.from_time(datetime.time(23, 59, 59)),
     )
     vehicle_count: int = 2
     vehicle_speed_mph: float = 18.0
@@ -503,6 +503,10 @@ class Solution:
             for package_id, package in self.data.packages.items()
             if package_id not in self.delivered_packages
         }
+
+    @property
+    def missed_packages_str(self) -> str:
+        return str(list(self.missed_packages.keys()))[1:-1]
 
     @property
     def delivered_packages_count(self) -> int:

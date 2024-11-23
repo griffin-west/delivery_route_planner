@@ -65,8 +65,8 @@ class ValidationView:
                 ft.DataColumn(label=ft.Text("Shipped")),
                 ft.DataColumn(label=ft.Text("Deadline")),
                 ft.DataColumn(label=ft.Text("Delivered")),
-                ft.DataColumn(label=ft.Text("Vehicle Required"), numeric=True),
-                ft.DataColumn(label=ft.Text("Vehicle Used"), numeric=True),
+                ft.DataColumn(label=ft.Text("Vehicle ID Required"), numeric=True),
+                ft.DataColumn(label=ft.Text("Vehicle ID Used"), numeric=True),
                 ft.DataColumn(label=ft.Text("Linked packages")),
             ],
             rows=package_rows,
@@ -79,18 +79,14 @@ class ValidationView:
 
         for package in self.solution.data.packages.values():
             vehicle_requirement = (
-                package.vehicle_requirement.id
-                if package.vehicle_requirement
-                else None
+                package.vehicle_requirement.id if package.vehicle_requirement else None
             )
             bundled_packages = (
                 [bundled_package.id for bundled_package in package.bundled_packages]
                 if len(package.bundled_packages) > 0
                 else None
             )
-            vehicle_used = (
-                package.vehicle_used.id if package.vehicle_used else None
-            )
+            vehicle_used = package.vehicle_used.id if package.vehicle_used else None
             if package.delivered_time:
                 status = "Delivered"
                 status_color = ft.colors.PRIMARY
@@ -101,7 +97,13 @@ class ValidationView:
                 ft.DataRow(
                     cells=[
                         ft.DataCell(ft.Text(str(package.id))),
-                        ft.DataCell(ft.Text(status, color=status_color)),
+                        ft.DataCell(
+                            ft.Text(
+                                status,
+                                color=status_color,
+                                font_family="Outfit-Bold",
+                            ),
+                        ),
                         ft.DataCell(
                             ft.Text(str(package.shipping_availability)),
                             placeholder=package.shipping_availability is None,
@@ -130,14 +132,10 @@ class ValidationView:
                             ft.Text(
                                 str(package.delivered_time),
                                 font_family=(
-                                    "Outfit-Bold"
-                                    if package.delivery_deadline
-                                    else None
+                                    "Outfit-Bold" if package.delivery_deadline else None
                                 ),
                                 color=(
-                                    status_color
-                                    if package.delivery_deadline
-                                    else None
+                                    status_color if package.delivery_deadline else None
                                 ),
                             ),
                             placeholder=package.delivery_deadline is None,
@@ -150,13 +148,9 @@ class ValidationView:
                             ft.Text(
                                 str(vehicle_used),
                                 font_family=(
-                                    "Outfit-Bold"
-                                    if vehicle_requirement
-                                    else None
+                                    "Outfit-Bold" if vehicle_requirement else None
                                 ),
-                                color=status_color
-                                if vehicle_requirement
-                                else None,
+                                color=status_color if vehicle_requirement else None,
                             ),
                             placeholder=vehicle_requirement is None,
                         ),
@@ -165,6 +159,7 @@ class ValidationView:
                             placeholder=bundled_packages is None,
                         ),
                     ],
+                    selected=package.delivered_time is not None,
                 ),
             )
 
