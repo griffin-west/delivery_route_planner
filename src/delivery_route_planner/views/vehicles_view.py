@@ -56,8 +56,8 @@ class VehiclesView:
         vehicle_table = ft.DataTable(
             columns=[
                 ft.DataColumn(label=ft.Text("Vehicle ID"), numeric=True),
-                ft.DataColumn(label=ft.Text("Speed (mph)"), numeric=True),
-                ft.DataColumn(label=ft.Text("Package capacity"), numeric=True),
+                ft.DataColumn(label=ft.Text("Speed (mph)")),
+                ft.DataColumn(label=ft.Text("Package capacity")),
             ],
             rows=vehicle_rows,
             heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD),
@@ -76,8 +76,18 @@ class VehiclesView:
             ft.DataRow(
                 cells=[
                     ft.DataCell(ft.Text(str(vehicle.id))),
-                    ft.DataCell(ft.Text(str(round(vehicle.speed_mph, 1)))),
-                    ft.DataCell(ft.Text(str(vehicle.package_capacity))),
+                    ft.DataCell(
+                        content=ft.Text(str(round(vehicle.speed_mph, 1))),
+                        show_edit_icon=True,
+                        on_tap=self.speed_cell_selected,
+                        data=vehicle.id,
+                    ),
+                    ft.DataCell(
+                        content=ft.Text(str(vehicle.package_capacity)),
+                        show_edit_icon=True,
+                        on_tap=self.capacity_cell_selected,
+                        data=vehicle.id,
+                    ),
                 ],
                 on_select_changed=row_selected,
                 selected=True,
@@ -99,3 +109,102 @@ class VehiclesView:
             ),
             padding=ft.padding.only(30, 0, 0, 30),
         )
+
+    def speed_cell_selected(self, e: ft.ControlEvent) -> None:
+
+        def save_new_speed(_e: ft.ControlEvent) -> None:
+            if entry.value is None:
+                return
+            new_speed = float(entry.value.strip())
+            vehicle = self.data.vehicles[e.control.data]
+            e.control.content.value = new_speed
+            vehicle.speed_mph = new_speed
+            vehicle.duration_map = models.TravelCostMap.with_duration(
+                self.data.addresses, new_speed,
+            )
+            self.page.close(edit_speed_dialog)
+            self.page.update()
+
+        def validate_speed_input(e: ft.ControlEvent) -> None:
+            try:
+                float(e.control.value.strip())
+                e.control.error_text = None
+                edit_speed_dialog.actions[1].disabled = False
+            except ValueError:
+                e.control.error_text = "Enter a number."
+                edit_speed_dialog.actions[1].disabled = True
+            self.page.update()
+
+        entry = ft.TextField(
+            value=e.control.content.value,
+            label="Vehicle speed (mph)",
+            on_change=validate_speed_input,
+        )
+        edit_speed_dialog = ft.AlertDialog(
+            icon=ft.Icon(ft.icons.SPEED_ROUNDED),
+            actions_alignment=ft.MainAxisAlignment.END,
+            content=ft.Column(
+                [
+                    entry,
+                ],
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton(
+                    text="Cancel",
+                    on_click=lambda _: self.page.close(edit_speed_dialog),
+                ),
+                ft.FilledTonalButton(
+                    text="Save",
+                    on_click=save_new_speed,
+                ),
+            ],
+        )
+        self.page.open(edit_speed_dialog)
+
+    def capacity_cell_selected(self, e: ft.ControlEvent) -> None:
+
+        def save_new_capacity(_e: ft.ControlEvent) -> None:
+            if entry.value is None:
+                return
+            new_capacity = int(entry.value.strip())
+            vehicle = self.data.vehicles[e.control.data]
+            e.control.content.value = new_capacity
+            vehicle.package_capacity = new_capacity
+            self.page.close(edit_capacity_dialog)
+            self.page.update()
+
+        def validate_capacity_input(e: ft.ControlEvent) -> None:
+            try:
+                int(e.control.value.strip())
+                e.control.error_text = None
+                edit_capacity_dialog.actions[1].disabled = False
+            except ValueError:
+                e.control.error_text = "Enter a number."
+                edit_capacity_dialog.actions[1].disabled = True
+            self.page.update()
+
+        entry = ft.TextField(
+            value=e.control.content.value,
+            label="Package capacity",
+            on_change=validate_capacity_input,
+        )
+        edit_capacity_dialog = ft.AlertDialog(
+            icon=ft.Icon(ft.icons.SCALE_ROUNDED),
+            actions_alignment=ft.MainAxisAlignment.END,
+            content=ft.Column(
+                [entry],
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton(
+                    text="Cancel",
+                    on_click=lambda _: self.page.close(edit_capacity_dialog),
+                ),
+                ft.FilledTonalButton(
+                    text="Save",
+                    on_click=save_new_capacity,
+                ),
+            ],
+        )
+        self.page.open(edit_capacity_dialog)
