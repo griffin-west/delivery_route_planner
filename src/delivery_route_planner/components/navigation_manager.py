@@ -103,6 +103,7 @@ class NavigationManager:
         self.page.close(solver_dialogs.progress)
         if solver_successful:
             self._enable_view("routes")
+            self._enable_view("validation")
             self._enable_view("charts")
             self.page.open(solver_dialogs.success)
         else:

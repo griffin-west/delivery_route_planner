@@ -174,7 +174,8 @@ class RoutingTime:
     @property
     def datetime(self) -> datetime.datetime:
         return datetime.datetime.combine(
-            datetime.datetime.now(tz=datetime.UTC), self.time,
+            datetime.datetime.now(tz=datetime.UTC),
+            self.time,
         )
 
     @property

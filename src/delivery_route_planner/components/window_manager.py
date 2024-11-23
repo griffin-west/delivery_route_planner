@@ -40,7 +40,7 @@ class WindowManager:
         self.page.window.width = 1000
         self.page.window.height = 700
         self.page.window.min_width = 600
-        self.page.window.min_height = 500
+        self.page.window.min_height = 600
         self.page.window.shadow = True
         self.page.window.prevent_close = self.page.platform != ft.PagePlatform.WINDOWS
         self.page.window.title_bar_hidden = True
@@ -51,6 +51,7 @@ class WindowManager:
 
         self.page.fonts = {
             "Outfit": "fonts/Outfit-Regular.ttf",
+            "Outfit-Bold": "fonts/Outfit-Bold.ttf",
             "Roboto": "fonts/Roboto-Regular.ttf",
             "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
         }

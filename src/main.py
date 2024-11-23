@@ -26,6 +26,7 @@ class DeliveryRoutePlanner:
             "vehicles": views.VehiclesView(page, self.data),
             "addresses": views.AddressesView(page, self.data),
             "routes": views.RoutesView(page),
+            "validation": views.ValidationView(page),
             "charts": views.ChartsView(page),
         }
 
@@ -50,6 +51,7 @@ class DeliveryRoutePlanner:
                 return False
             self.solution = solution
             self.views["routes"].set_solution(self.solution)
+            self.views["validation"].set_solution(self.solution)
             self.views["charts"].set_solution(self.solution)
             return True
 
