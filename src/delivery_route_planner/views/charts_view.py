@@ -213,7 +213,15 @@ class ChartsView:
                             ft.BarChartRod(
                                 from_y=0,
                                 to_y=this_stop.vehicle_load,
-                                color=ft.colors.PRIMARY,
+                                color=(
+                                    ft.colors.PRIMARY
+                                    if route.vehicle.id == 1
+                                    else (
+                                        ft.colors.TERTIARY
+                                        if route.vehicle.id == 2
+                                        else ft.colors.SECONDARY
+                                    )
+                                ),
                                 width=25,
                                 border_radius=5,
                             ),
@@ -265,7 +273,7 @@ class ChartsView:
         for route in self.solution.routes:
             data_points = []
             step = 1
-            for this_stop, next_stop in zip(route.stops[1:], route.stops[2:]):
+            for this_stop, next_stop in zip(route.stops[1:], route.stops[2:] + [None]):
                 if (
                     next_stop
                     and this_stop.node.kind == next_stop.node.kind
@@ -276,6 +284,7 @@ class ChartsView:
                     ft.LineChartDataPoint(
                         x=this_stop.visit_time.seconds,
                         y=round(this_stop.mileage, 1),
+                        point=ft.ChartCirclePoint(radius=5),
                     ),
                 )
                 step = step + 1
@@ -310,7 +319,7 @@ class ChartsView:
                 title_size=30,
                 labels_size=30,
                 show_labels=True,
-                labels_interval=3600,
+                labels_interval=1800,
                 labels=[
                     ft.ChartAxisLabel(
                         value=i,
@@ -318,28 +327,52 @@ class ChartsView:
                     ) for i in range(
                         self.solution.data.scenario.day_start.seconds,
                         self.solution.end_time.seconds,
-                        3600,
+                        1800,
                         )
                 ],
             ),
-            width=800,
+            width=1200,
             tooltip_bgcolor=ft.colors.SURFACE,
             horizontal_grid_lines=ft.ChartGridLines(10),
             vertical_grid_lines=ft.ChartGridLines(900),
             max_y=round((max(route.mileage for route in self.solution.routes) * 1.1), 0),
         )
 
+        vehicle_labels = ft.Column(
+            [
+                ft.Text(
+                    f"Vehicle {route.vehicle.id}",
+                    color=(
+                        ft.colors.PRIMARY
+                        if route.vehicle.id == 1
+                        else (
+                            ft.colors.TERTIARY
+                            if route.vehicle.id == 2
+                            else ft.colors.SECONDARY
+                        )
+                    ),
+                    font_family="Outfit-Bold",
+                ) for route in self.solution.routes
+            ],
+        )
+
         line_chart_card = ft.Card(
             content=ft.Container(
-                ft.Column(
+                ft.Row(
                     [
-                        ft.Text(
-                            "Mileage Over Time",
-                            style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        ft.Column(
+                            [
+                                ft.Text(
+                                    "Mileage Over Time",
+                                    style=ft.TextThemeStyle.TITLE_MEDIUM,
+                                ),
+                                line_chart,
+                            ],
+                            spacing=30,
                         ),
-                        line_chart,
+                        vehicle_labels,
                     ],
-                    spacing=30,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
                 ),
                 padding=20,
             ),
