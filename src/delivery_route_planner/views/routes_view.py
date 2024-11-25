@@ -70,7 +70,6 @@ class RoutesView:
                     ft.DataColumn(label=ft.Text("Time")),
                 ],
                 rows=route_steps,
-                heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD),
                 border_radius=15,
                 border=ft.border.all(2, ft.colors.OUTLINE_VARIANT),
                 vertical_lines=ft.BorderSide(1, ft.colors.OUTLINE_VARIANT),
@@ -120,10 +119,10 @@ class RoutesView:
                 ft.Container(
                     ft.ListTile(
                         leading=ft.Icon(ft.icons.INFO_ROUNDED),
-                        title=ft.Text("This is not an error."),
+                        title=ft.Text("Vehicle unused"),
                         subtitle=ft.Text(
                             "It is possible for the algorithm to optimize "
-                            "total mileage by utilizing only one vehicle.",
+                            "total mileage without utilizing every vehicle.",
                         ),
                         content_padding=0,
                     ),
@@ -169,7 +168,7 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=350,
+            width=400,
         )
 
         delivered_count = self.solution.delivered_packages_count
@@ -200,21 +199,21 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=350,
+            width=400,
         )
 
         card_row = ft.Container(
             ft.Row(
                 [
-                    delivery_success_card,
                     total_mileage_card,
-                    ft.Container(width=30),
+                    delivery_success_card,
                 ],
                 wrap=True,
                 spacing=30,
                 run_spacing=30,
                 vertical_alignment=ft.CrossAxisAlignment.START,
             ),
+            padding=ft.padding.only(0, 0, 30, 0),
         )
 
         return ft.Container(

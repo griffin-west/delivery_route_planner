@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import csv
 import datetime
 from dataclasses import dataclass, field
@@ -110,26 +111,24 @@ class Vehicle:
     @classmethod
     def add_to_fleet(
         cls,
-        data: DataModel,
+        vehicles: VehicleDict,
+        addresses: AddressDict,
         vehicle_id: int,
         speed_mph: float,
         package_capacity: int,
     ) -> None:
-        new_travel_map = TravelCostMap.with_duration(data.addresses, speed_mph)
+        new_travel_map = TravelCostMap.with_duration(addresses, speed_mph)
         new_vehicle = cls(
             id=vehicle_id,
             speed_mph=speed_mph,
             package_capacity=package_capacity,
             duration_map=new_travel_map,
         )
-        data.vehicles[vehicle_id] = new_vehicle
+        vehicles[vehicle_id] = new_vehicle
 
     @classmethod
     def find_max_vehicle_id(cls, vehicles: VehicleDict) -> int:
-        max_vehicle_id = 0
-        for vehicle in vehicles.values():
-            max_vehicle_id = max(max_vehicle_id, vehicle.id)
-        return max_vehicle_id
+        return max(vehicle.id for vehicle in vehicles.values())
 
     @property
     def index(self) -> int:
@@ -326,7 +325,7 @@ class RoutingScenario:
 
 @dataclass
 class SearchSettings:
-    max_mileage_per_vehicle: int = 100
+    max_mileage_per_vehicle: int = 1000
     distance_span_cost_coefficient: int = 0
     base_penalty: int = 1000
     penalty_scale_req_vehicle: int = 3
@@ -472,17 +471,18 @@ class Solution:
         router: pywrapcp.RoutingModel,
         assignments: pywrapcp.Assignment,
     ) -> Solution:
+        new_data = copy.deepcopy(data)
         return cls(
-            data=data,
+            data=new_data,
             routes=[
                 Route.create_route(
                     vehicle,
-                    data,
+                    new_data,
                     manager,
                     router,
                     assignments,
                 )
-                for vehicle in data.vehicles.values()
+                for vehicle in new_data.vehicles.values()
             ],
         )
 

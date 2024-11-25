@@ -21,9 +21,17 @@ class DeliveryRoutePlanner:
             solution_callback=self.create_solution,
         )
         self.views = {
-            "setup": views.SettingsView(page, self.data),
+            "settings": views.SettingsView(
+                page,
+                self.data,
+                self.navigation_manager.navigate_from_view_name,
+            ),
             "packages": views.PackagesView(page, self.data),
-            "vehicles": views.VehiclesView(page, self.data),
+            "vehicles": views.VehiclesView(
+                page,
+                self.data,
+                self.navigation_manager.navigate_from_view_name,
+            ),
             "addresses": views.AddressesView(page, self.data),
             "routes": views.RoutesView(page),
             "validation": views.ValidationView(page),

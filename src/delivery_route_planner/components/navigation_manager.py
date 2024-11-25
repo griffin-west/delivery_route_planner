@@ -43,13 +43,15 @@ class NavigationManager:
     def set_views(self, views: dict) -> None:
         self.views = views
         self.view_names = list(views.keys())
-        self.view_container.content = self.views["setup"].render()
+        self.view_container.content = self.views["settings"].render()
         self.navigation_rail = self._build_navigation_rail(views)
 
-    def navigate_from_view_name(self, view_name: str) -> None:
-        if view_name in self.views:
-            self.view_container.content = self.views[view_name].render()
-            self.page.update()
+    def navigate_from_view_name(self, name: str) -> None:
+        for i, view_name in enumerate(self.view_names):
+            if view_name == name:
+                self.navigation_rail.selected_index = i
+                self.view_container.content = self.views[view_name].render()
+                self.page.update()
 
     def _navigate_from_selection(self, e: ft.ControlEvent) -> None:
         selected_view_name = self.view_names[e.control.selected_index]

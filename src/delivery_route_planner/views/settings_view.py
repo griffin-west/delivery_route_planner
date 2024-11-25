@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Callable
+
 import flet as ft
 from ortools.constraint_solver.routing_enums_pb2 import (
     FirstSolutionStrategy,
@@ -13,15 +15,20 @@ SOLUTION_LIMIT_WARNING_THRESHOLD = 1000
 
 
 class SettingsView:
-    def __init__(self, page: ft.Page, data: models.DataModel) -> None:
+    def __init__(
+        self,
+        page: ft.Page,
+        data: models.DataModel,
+        navigation_callback: Callable,
+    ) -> None:
+
         self.page = page
         self.data = data
-
+        self.rerender = navigation_callback
         self.title = "Settings"
         self.icon = ft.icons.SETTINGS_OUTLINED
         self.selected_icon = ft.icons.SETTINGS_ROUNDED
         self.disabled = False
-
         self.start_time_card = self.create_start_time_card()
         self.time_limit_card = self.create_time_limit_card()
         self.solution_limit_card = self.create_solution_limit_card()
@@ -32,14 +39,39 @@ class SettingsView:
 
     def render(self) -> ft.Column:
         title = ft.Text(self.title, style=ft.TextThemeStyle.HEADLINE_SMALL)
-        reset_button = ft.FilledTonalButton(
-            "Restore defaults",
+
+        self.reset_vehicle_checkbox = ft.Checkbox("Reset vehicles too", value=False)
+        self.reset_defaults_dialog = ft.AlertDialog(
+            icon=ft.Icon(ft.icons.RESTORE_ROUNDED),
+            title=ft.Text("Are you sure?", text_align=ft.TextAlign.CENTER),
+            actions_alignment=ft.MainAxisAlignment.END,
+            content=ft.Column(
+                [
+                    ft.Text("This will reset all settings."),
+                    self.reset_vehicle_checkbox,
+                ],
+                tight=True,
+            ),
+            actions=[
+                ft.TextButton(
+                    "Cancel",
+                    on_click=lambda _: self.page.close(self.reset_defaults_dialog),
+                ),
+                ft.FilledTonalButton(
+                    "Reset",
+                    on_click=self.reset_all,
+                ),
+            ],
+        )
+        reset_defaults_button = ft.FilledTonalButton(
+            "Reset defaults",
             ft.icons.RESTORE_ROUNDED,
+            on_click=lambda _: self.page.open(self.reset_defaults_dialog),
         )
 
         header = ft.Container(
             ft.Row(
-                [title, reset_button],
+                [title, reset_defaults_button],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             ),
             padding=30,
@@ -92,11 +124,37 @@ class SettingsView:
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
 
+    def reset_all(self, _e: ft.ControlEvent) -> None:
+        self.data.scenario = models.RoutingScenario()
+        self.data.settings = models.SearchSettings()
+        if self.reset_vehicle_checkbox.value is True:
+            self.data.vehicles = models.Vehicle.with_shared_attributes(
+                self.data.scenario.vehicle_count,
+                self.data.scenario.vehicle_speed_mph,
+                self.data.scenario.vehicle_capacity,
+                models.TravelCostMap.with_duration(
+                    self.data.addresses,
+                    self.data.scenario.vehicle_speed_mph,
+                ),
+            )
+        self.page.close(self.reset_defaults_dialog)
+
+        self.start_time_card = self.create_start_time_card()
+        self.time_limit_card = self.create_time_limit_card()
+        self.solution_limit_card = self.create_solution_limit_card()
+        self.search_logging_card = self.create_search_logging_card()
+        self.first_solution_card = self.create_first_solution_strategy_card()
+        self.metaheuristic_card = self.create_local_search_metaheuristic_card()
+        self.requirements_card = self.create_requirements_card()
+
+        self.rerender("settings")
+        self.page.update()
+
     def create_vehicles_card(self) -> ft.Card:
         self.vehicles_callout = ft.Text(
             str(len(self.data.vehicles)),
             theme_style=ft.TextThemeStyle.TITLE_LARGE,
-            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
+            style=ft.TextStyle(font_family="Outfit-Bold"),
         )
         vehicles_header = ft.ListTile(
             leading=ft.Icon(ft.icons.LOCAL_SHIPPING_OUTLINED),
@@ -106,16 +164,21 @@ class SettingsView:
             ),
             trailing=self.vehicles_callout,
         )
-        vehicles_disclaimer = ft.Container(
-            ft.Text("*Work in progress.\nVehicles cannot be modified at this time."),
-            padding=ft.padding.only(20, 0, 20, 10),
+        vehicles_button = ft.Container(
+            ft.TextButton(
+                text="Go to page",
+                icon=ft.icons.SHORTCUT_ROUNDED,
+                on_click=lambda _: self.rerender("vehicles"),
+            ),
+            padding=ft.padding.only(0, 0, 20, 10),
         )
         return SettingsCard(
             ft.Column(
                 [
                     vehicles_header,
-                    vehicles_disclaimer,
+                    vehicles_button,
                 ],
+                horizontal_alignment=ft.CrossAxisAlignment.END,
             ),
         )
 
@@ -123,7 +186,7 @@ class SettingsView:
         self.packages_callout = ft.Text(
             str(len(self.data.packages)),
             theme_style=ft.TextThemeStyle.TITLE_LARGE,
-            style=ft.TextStyle(weight=ft.FontWeight.BOLD),
+            style=ft.TextStyle(font_family="Outfit-Bold"),
         )
         packages_header = ft.ListTile(
             leading=ft.Icon(ft.icons.INVENTORY_2_OUTLINED),
@@ -133,16 +196,21 @@ class SettingsView:
             ),
             trailing=self.packages_callout,
         )
-        packages_disclaimer = ft.Container(
-            ft.Text("*Work in progress.\nPackages cannot be modified at this time."),
-            padding=ft.padding.only(20, 0, 20, 10),
+        packages_button = ft.Container(
+            ft.TextButton(
+                text="Go to page",
+                icon=ft.icons.SHORTCUT_ROUNDED,
+                on_click=lambda _: self.rerender("packages"),
+            ),
+            padding=ft.padding.only(0, 0, 20, 10),
         )
         return SettingsCard(
             ft.Column(
                 [
                     packages_header,
-                    packages_disclaimer,
+                    packages_button,
                 ],
+                horizontal_alignment=ft.CrossAxisAlignment.END,
             ),
         )
 
@@ -520,7 +588,7 @@ class SettingsView:
                 [
                     ft.Text(
                         "*Work in progress.\n "
-                        "These options are not yet user-customizable.",
+                        "These options cannot be modified at this time.",
                     ),
                     capacity_checkbox,
                     availability_checkbox,

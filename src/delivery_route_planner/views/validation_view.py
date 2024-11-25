@@ -70,7 +70,6 @@ class ValidationView:
                 ft.DataColumn(label=ft.Text("Linked packages")),
             ],
             rows=package_rows,
-            heading_text_style=ft.TextStyle(weight=ft.FontWeight.BOLD),
             border_radius=15,
             border=ft.border.all(2, ft.colors.OUTLINE_VARIANT),
             vertical_lines=ft.BorderSide(1, ft.colors.OUTLINE_VARIANT),

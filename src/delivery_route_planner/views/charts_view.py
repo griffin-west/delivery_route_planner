@@ -115,7 +115,11 @@ class ChartsView:
                     color=(
                         ft.colors.PRIMARY
                         if route.vehicle.id == 1
-                        else ft.colors.TERTIARY
+                        else (
+                            ft.colors.TERTIARY
+                            if route.vehicle.id == 2
+                            else ft.colors.SECONDARY
+                        )
                     ),
                     radius=150,
                 )
