@@ -42,7 +42,10 @@ class ChartsView:
             controls=[
                 self._build_pie_charts(),
                 self._build_bar_charts(),
+                self._build_line_chart(),
+                ft.Container(),
             ],
+            spacing=30,
             scroll=ft.ScrollMode.AUTO,
             expand=True,
         )
@@ -162,7 +165,7 @@ class ChartsView:
                 scroll=ft.ScrollMode.AUTO,
                 spacing=30,
             ),
-            padding=ft.padding.only(30, 0, 0, 30),
+            padding=ft.padding.only(30, 0, 0, 0),
         )
 
     def _build_bar_charts(self) -> ft.Container:
@@ -171,21 +174,9 @@ class ChartsView:
 
         capacity_charts = []
         for route in self.solution.routes:
+            bars = []
             capacity_chart = ft.BarChart(
-                bar_groups=[
-                    ft.BarChartGroup(
-                        x=i,
-                        bar_rods=[
-                            ft.BarChartRod(
-                                from_y=0,
-                                to_y=stop.vehicle_load,
-                                color=ft.colors.SECONDARY,
-                                width=25,
-                                border_radius=5,
-                            ),
-                        ],
-                    ) for i, stop in enumerate(route.stops[1:-1], 1)
-                ],
+                bar_groups=bars,
                 left_axis=ft.ChartAxis(
                     title=ft.Text("Number of Packages"),
                     title_size=30,
@@ -202,11 +193,37 @@ class ChartsView:
                 horizontal_grid_lines=ft.ChartGridLines(
                     interval=route.vehicle.package_capacity,
                     color=ft.colors.ERROR,
+                    dash_pattern=[3, 3],
                 ),
-                width=max(400, (len(route.stops) * 30)),
                 max_y=route.vehicle.package_capacity + 2,
                 tooltip_bgcolor=ft.colors.SURFACE,
             )
+
+            step = 1
+            for this_stop, next_stop in zip(route.stops[1:], route.stops[2:]):
+                if (
+                    next_stop
+                    and this_stop.node.kind == next_stop.node.kind
+                    and this_stop.node.address == next_stop.node.address
+                ):
+                    continue
+                bars.append(ft.BarChartGroup(
+                        x=step,
+                        bar_rods=[
+                            ft.BarChartRod(
+                                from_y=0,
+                                to_y=this_stop.vehicle_load,
+                                color=ft.colors.PRIMARY,
+                                width=25,
+                                border_radius=5,
+                            ),
+                        ],
+                    ),
+                )
+                step = step + 1
+
+            capacity_chart.width = max(300, (step * 30))
+
             capacity_chart_card = ft.Card(
                 content=ft.Container(
                     ft.Column(
@@ -225,18 +242,114 @@ class ChartsView:
             )
             capacity_charts.append(
                 ft.Row(
-                    [
-                        capacity_chart_card,
-                        ft.Container(width=20),
-                    ],
+                    [capacity_chart_card],
                     scroll=ft.ScrollMode.AUTO,
                 ),
             )
 
         return ft.Container(
-            content=ft.Column(
+            content=ft.Row(
                 controls=capacity_charts,
                 spacing=30,
+                wrap=True,
+                run_spacing=30,
             ),
-            padding=ft.padding.only(30, 0, 0, 30),
+            padding=ft.padding.only(30, 0, 0, 0),
+        )
+
+    def _build_line_chart(self) -> ft.Container:
+        if not self.solution:
+            return ft.Container()
+
+        data_series = []
+        for route in self.solution.routes:
+            data_points = []
+            step = 1
+            for this_stop, next_stop in zip(route.stops[1:], route.stops[2:]):
+                if (
+                    next_stop
+                    and this_stop.node.kind == next_stop.node.kind
+                    and this_stop.node.address == next_stop.node.address
+                ):
+                    continue
+                data_points.append(
+                    ft.LineChartDataPoint(
+                        x=this_stop.visit_time.seconds,
+                        y=round(this_stop.mileage, 1),
+                    ),
+                )
+                step = step + 1
+            data_series.append(
+                ft.LineChartData(
+                    data_points=data_points,
+                    stroke_width=5,
+                    stroke_cap_round=True,
+                    curved=True,
+                    color=(
+                        ft.colors.PRIMARY
+                        if route.vehicle.id == 1
+                        else (
+                            ft.colors.TERTIARY
+                            if route.vehicle.id == 2
+                            else ft.colors.SECONDARY
+                        )
+                    ),
+                ),
+            )
+
+        line_chart = ft.LineChart(
+            data_series=data_series,
+            left_axis=ft.ChartAxis(
+                title=ft.Text("Mileage"),
+                title_size=30,
+                labels_size=30,
+                show_labels=True,
+            ),
+            bottom_axis=ft.ChartAxis(
+                title=ft.Text("Time"),
+                title_size=30,
+                labels_size=30,
+                show_labels=True,
+                labels_interval=3600,
+                labels=[
+                    ft.ChartAxisLabel(
+                        value=i,
+                        label=ft.Text(models.RoutingTime.from_seconds(i).short_str),
+                    ) for i in range(
+                        self.solution.data.scenario.day_start.seconds,
+                        self.solution.end_time.seconds,
+                        3600,
+                        )
+                ],
+            ),
+            width=800,
+            tooltip_bgcolor=ft.colors.SURFACE,
+            horizontal_grid_lines=ft.ChartGridLines(10),
+            vertical_grid_lines=ft.ChartGridLines(900),
+            max_y=round((max(route.mileage for route in self.solution.routes) * 1.1), 0),
+        )
+
+        line_chart_card = ft.Card(
+            content=ft.Container(
+                ft.Column(
+                    [
+                        ft.Text(
+                            "Mileage Over Time",
+                            style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        ),
+                        line_chart,
+                    ],
+                    spacing=30,
+                ),
+                padding=20,
+            ),
+            variant=ft.CardVariant.FILLED,
+        )
+
+        return ft.Container(
+            content=ft.Row(
+                [line_chart_card],
+                scroll=ft.ScrollMode.AUTO,
+            ),
+            padding=ft.padding.only(30, 0, 0, 0),
         )

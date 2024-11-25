@@ -491,14 +491,14 @@ class Solution:
         return sum(route.mileage for route in self.routes)
 
     @property
-    def end_time(self) -> RoutingTime | None:
+    def end_time(self) -> RoutingTime:
         route_times = [
             route.end_time.seconds for route in self.routes if route.end_time
         ]
         if route_times:
             max_time = max(route_times)
             return RoutingTime.from_seconds(max_time)
-        return None
+        return self.data.scenario.day_start
 
     @property
     def time_used_seconds(self) -> int:
