@@ -40,7 +40,8 @@ class ChartsView:
         )
         body = ft.Column(
             controls=[
-                self._build_charts(),
+                self._build_pie_charts(),
+                self._build_bar_charts(),
             ],
             scroll=ft.ScrollMode.AUTO,
             expand=True,
@@ -54,7 +55,7 @@ class ChartsView:
     def set_solution(self, solution: models.Solution) -> None:
         self.solution = solution
 
-    def _build_charts(self) -> ft.Container:
+    def _build_pie_charts(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 
@@ -69,7 +70,11 @@ class ChartsView:
                     color=(
                         ft.colors.PRIMARY
                         if route.vehicle.id == 1
-                        else ft.colors.TERTIARY
+                        else (
+                            ft.colors.TERTIARY
+                            if route.vehicle.id == 2
+                            else ft.colors.SECONDARY
+                        )
                     ),
                     radius=150,
                 )
@@ -77,24 +82,6 @@ class ChartsView:
             ],
             center_space_radius=0,
             start_degree_offset=180,
-        )
-
-        mileage_pie_card = ft.Card(
-            content=ft.Container(
-                ft.Column(
-                    [
-                        ft.Text(
-                            "Vehicle Utilization by Mileage",
-                            style=ft.TextThemeStyle.TITLE_MEDIUM,
-                        ),
-                        mileage_pie,
-                    ],
-                    spacing=20,
-                ),
-                padding=20,
-                width=400,
-            ),
-            variant=ft.CardVariant.FILLED,
         )
 
         def time_label(seconds: int) -> str:
@@ -129,6 +116,24 @@ class ChartsView:
             start_degree_offset=180,
         )
 
+        mileage_pie_card = ft.Card(
+            content=ft.Container(
+                ft.Column(
+                    [
+                        ft.Text(
+                            "Vehicle Utilization by Mileage",
+                            style=ft.TextThemeStyle.TITLE_MEDIUM,
+                        ),
+                        mileage_pie,
+                    ],
+                    spacing=20,
+                ),
+                padding=20,
+                width=400,
+            ),
+            variant=ft.CardVariant.FILLED,
+        )
+
         time_pie_card = ft.Card(
             content=ft.Container(
                 ft.Column(
@@ -152,9 +157,85 @@ class ChartsView:
                 [
                     mileage_pie_card,
                     time_pie_card,
-                    ft.Container(width=30),
+                    ft.Container(),
                 ],
                 scroll=ft.ScrollMode.AUTO,
+                spacing=30,
+            ),
+            padding=ft.padding.only(30, 0, 0, 30),
+        )
+
+    def _build_bar_charts(self) -> ft.Container:
+        if not self.solution:
+            return ft.Container()
+
+        capacity_charts = []
+        for route in self.solution.routes:
+            capacity_chart = ft.BarChart(
+                bar_groups=[
+                    ft.BarChartGroup(
+                        x=i,
+                        bar_rods=[
+                            ft.BarChartRod(
+                                from_y=0,
+                                to_y=stop.vehicle_load,
+                                color=ft.colors.SECONDARY,
+                                width=25,
+                                border_radius=5,
+                            ),
+                        ],
+                    ) for i, stop in enumerate(route.stops[1:-1], 1)
+                ],
+                left_axis=ft.ChartAxis(
+                    title=ft.Text("Number of Packages"),
+                    title_size=30,
+                    labels_size=30,
+                    show_labels=True,
+                    labels_interval=4,
+                ),
+                bottom_axis=ft.ChartAxis(
+                    title=ft.Text("Route Steps"),
+                    title_size=30,
+                    labels_size=30,
+                    show_labels=True,
+                ),
+                horizontal_grid_lines=ft.ChartGridLines(
+                    interval=route.vehicle.package_capacity,
+                    color=ft.colors.ERROR,
+                ),
+                width=max(400, (len(route.stops) * 30)),
+                max_y=route.vehicle.package_capacity + 2,
+                tooltip_bgcolor=ft.colors.SURFACE,
+            )
+            capacity_chart_card = ft.Card(
+                content=ft.Container(
+                    ft.Column(
+                        [
+                            ft.Text(
+                                f"Load vs Capacity: Vehicle {route.vehicle.id}",
+                                style=ft.TextThemeStyle.TITLE_MEDIUM,
+                            ),
+                            capacity_chart,
+                        ],
+                        spacing=30,
+                    ),
+                    padding=20,
+                ),
+                variant=ft.CardVariant.FILLED,
+            )
+            capacity_charts.append(
+                ft.Row(
+                    [
+                        capacity_chart_card,
+                        ft.Container(width=20),
+                    ],
+                    scroll=ft.ScrollMode.AUTO,
+                ),
+            )
+
+        return ft.Container(
+            content=ft.Column(
+                controls=capacity_charts,
                 spacing=30,
             ),
             padding=ft.padding.only(30, 0, 0, 30),

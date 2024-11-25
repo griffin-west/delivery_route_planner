@@ -1,8 +1,12 @@
+import base64
+from pathlib import Path
 from typing import Callable, NamedTuple
 
 import flet as ft
 
 from delivery_route_planner.models import models
+
+LOTTIE_FILE = "src/delivery_route_planner/assets/animations/routing-loading.json"
 
 
 class SolutionDialogs(NamedTuple):
@@ -120,20 +124,20 @@ class NavigationManager:
         self.page.update()
 
     def _build_solution_dialogs(self) -> SolutionDialogs:
+        with Path(LOTTIE_FILE).open(encoding="utf-8") as lottie_file:
+            json_data = lottie_file.read()
+            json_base64 = base64.b64encode(json_data.encode("utf-8")).decode("utf-8")
+        loading_animation = ft.Lottie(
+            src_base64=json_base64,
+            fit=ft.ImageFit.SCALE_DOWN,
+            background_loading=True,
+            width=300,
+        )
         solver_progress_dialog = ft.AlertDialog(
             title=ft.Text("Please wait"),
             content=ft.Column(
                 [
-                    ft.Container(
-                        ft.Lottie(
-                            src="animations/routing-loading.json",
-                            reverse=False,
-                            animate=True,
-                            fit=ft.ImageFit.FIT_HEIGHT,
-                        ),
-                        height=250,
-                        width=300,
-                    ),
+                    loading_animation,
                     ft.Text("Planning delivery routes..."),
                     ft.ProgressBar(border_radius=5),
                 ],
@@ -142,7 +146,7 @@ class NavigationManager:
             modal=True,
         )
         solver_success_dialog = ft.AlertDialog(
-            icon=ft.Icon(name=ft.icons.CHECK_CIRCLE_OUTLINE_ROUNDED),
+            icon=ft.Icon(name=ft.icons.CHECK_CIRCLE_ROUNDED),
             title=ft.Text("Solution found"),
             content=ft.Text(
                 "New routes have been created.\n"

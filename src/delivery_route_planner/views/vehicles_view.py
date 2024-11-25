@@ -6,6 +6,7 @@ from delivery_route_planner.models import models
 
 RESERVED_VEHICLE_IDS = 2
 
+
 class VehiclesView:
     def __init__(
         self,
@@ -170,7 +171,8 @@ class VehiclesView:
             e.control.content.value = new_speed
             vehicle.speed_mph = new_speed
             vehicle.duration_map = models.TravelCostMap.with_duration(
-                self.data.addresses, new_speed,
+                self.data.addresses,
+                new_speed,
             )
             self.page.close(edit_speed_dialog)
             self.page.update()

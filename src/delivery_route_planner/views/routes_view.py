@@ -168,7 +168,7 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=400,
+            width=380,
         )
 
         delivered_count = self.solution.delivered_packages_count
@@ -199,7 +199,7 @@ class RoutesView:
                 padding=10,
             ),
             variant=ft.CardVariant.FILLED,
-            width=400,
+            width=380,
         )
 
         card_row = ft.Container(
