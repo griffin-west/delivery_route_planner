@@ -160,7 +160,7 @@ class SettingsView:
             leading=ft.Icon(ft.icons.LOCAL_SHIPPING_OUTLINED),
             title=ft.Text("Vehicles in use"),
             subtitle=ft.Text(
-                "Use the Vehicles page to view, modify, or add new vehicles.",
+                "You can view, modify, or add new vehicles on the Vehicles page.",
             ),
             trailing=self.vehicles_callout,
         )
@@ -192,7 +192,7 @@ class SettingsView:
             leading=ft.Icon(ft.icons.INVENTORY_2_OUTLINED),
             title=ft.Text("Packages to deliver"),
             subtitle=ft.Text(
-                "Use the Packages page to view, modify, or add new packages.",
+                "You can view, modify, or add new packages on the Packages page.",
             ),
             trailing=self.packages_callout,
         )
@@ -226,8 +226,8 @@ class SettingsView:
 
             time_picker = ft.TimePicker(
                 confirm_text="Confirm",
-                error_invalid_text="Time out of range",
-                help_text="Pick the earliest time deliveries may begin.",
+                help_text="Choose a time earlier than 9 am "
+                "to ensure all packages are able to be delivered.",
                 value=self.data.scenario.day_start.time,
                 on_change=_update_time,
             )
@@ -336,7 +336,7 @@ class SettingsView:
             leading=ft.Icon(ft.icons.REFRESH_ROUNDED),
             title=ft.Text("Solution limit"),
             subtitle=ft.Text(
-                "More iterations will yield better results.",
+                "Solutions are iterated very rapidly to optimize the results.",
             ),
             trailing=solution_limit_callout,
         )
@@ -364,10 +364,10 @@ class SettingsView:
 
         logging_header = ft.ListTile(
             leading=ft.Icon(ft.icons.TERMINAL_ROUNDED),
-            title=ft.Text("Search logging"),
+            title=ft.Text("OR-Tools search logging"),
             subtitle=ft.Text(
-                "Enables detailed logging from OR-Tools. "
-                "Displays as STDOUT in the terminal.",
+                "This will open the terminal to display detailed logging "
+                "output from OR-Tools while the solver is running.",
             ),
         )
         logging_switch = ft.Container(
@@ -399,7 +399,10 @@ class SettingsView:
         first_solution_strategy_header = ft.ListTile(
             leading=ft.Icon(ft.icons.FORK_LEFT_ROUNDED),
             title=ft.Text("First solution strategy"),
-            subtitle=ft.Text("Select the algorithm used to find an initial solution."),
+            subtitle=ft.Text(
+                "Select the algorithm used to find the initial solution."
+                "It will then be iterated further with the chosen metaheuristic.",
+            ),
         )
         first_solution_strategy_radio_group = ft.RadioGroup(
             value="LOCAL_CHEAPEST_INSERTION",
@@ -470,8 +473,7 @@ class SettingsView:
             leading=ft.Icon(ft.icons.HUB_OUTLINED),
             title=ft.Text("Local search metaheuristic"),
             subtitle=ft.Text(
-                "Select the advanced algorithm used "
-                "to further optimize the initial solution.",
+                "Select a metaheuristic algorithm to optimize the initial solution.",
             ),
         )
         local_search_metaheuristic_radio_group = ft.RadioGroup(
@@ -557,7 +559,7 @@ class SettingsView:
         availability_checkbox = ft.ListTile(
             title=ft.Checkbox(label="Shipping delays", value=True, disabled=True),
             subtitle=ft.Text(
-                "Packages cannot leave the Depot until their availability time.",
+                "Packages cannot leave the depot until their availability time.",
             ),
         )
         deadlines_checkbox = ft.ListTile(
@@ -580,7 +582,7 @@ class SettingsView:
             title=ft.Checkbox(label="Linked packages", value=True, disabled=True),
             subtitle=ft.Text(
                 "Packages that are linked together must be "
-                "delivered by the same vehicle.",
+                "picked up and delivered by the same vehicle.",
             ),
         )
         requirements_toggles = ft.Container(

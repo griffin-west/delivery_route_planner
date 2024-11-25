@@ -69,7 +69,7 @@ class NavigationManager:
             foreground_color=ft.colors.ON_PRIMARY,
             elevation=2,
             hover_elevation=4,
-            on_click=self.start_or_tools_solver,
+            on_click=self.start_solver,
         )
         solve_button_container = ft.Container(
             ft.Column(
@@ -98,7 +98,7 @@ class NavigationManager:
             on_change=self._navigate_from_selection,
         )
 
-    def start_or_tools_solver(self, _e: ft.ControlEvent) -> None:
+    def start_solver(self, _e: ft.ControlEvent) -> None:
         solver_dialogs = self._build_solution_dialogs()
 
         self.page.open(solver_dialogs.progress)

@@ -160,10 +160,11 @@ class ChartsView:
                 [
                     mileage_pie_card,
                     time_pie_card,
-                    ft.Container(),
                 ],
                 scroll=ft.ScrollMode.AUTO,
                 spacing=30,
+                wrap=True,
+                run_spacing=30,
             ),
             padding=ft.padding.only(30, 0, 0, 0),
         )
@@ -381,7 +382,11 @@ class ChartsView:
 
         return ft.Container(
             content=ft.Row(
-                [line_chart_card],
+                [
+                    line_chart_card,
+                    ft.Container(width=30),
+                ],
+                spacing=0,
                 scroll=ft.ScrollMode.AUTO,
             ),
             padding=ft.padding.only(30, 0, 0, 0),
