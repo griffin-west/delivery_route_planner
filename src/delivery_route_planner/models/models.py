@@ -219,11 +219,11 @@ class Package:
         vehicles: VehicleDict,
         addresses: AddressDict,
     ) -> Package:
-        vehicle_id = cls._convert_or_none(row["vehicle_requirement"], int)
+        vehicle_id = cls.convert_or_none(row["vehicle_requirement"], int)
         return cls(
             id=int(row["id"]),
             address=addresses[row["address"].strip()],
-            weight_kg=cls._convert_or_none(row["weight_kg"], float),
+            weight_kg=cls.convert_or_none(row["weight_kg"], float),
             shipping_availability=RoutingTime.from_isoformat(row["availability"]),
             delivery_deadline=RoutingTime.from_isoformat(row["deadline"]),
             vehicle_requirement=vehicles[vehicle_id] if vehicle_id else None,
@@ -232,7 +232,7 @@ class Package:
     @classmethod
     def add_bundled_packages(cls, row: CsvRow, packages: PackageDict) -> None:
         bundled_ids = [
-            cls._convert_or_none(bundled_id, int)
+            cls.convert_or_none(bundled_id, int)
             for bundled_id in row["linked_packages"].split(",")
         ]
         packages[int(row["id"])].bundled_packages.extend(
@@ -240,14 +240,14 @@ class Package:
         )
 
     @staticmethod
-    def _convert_or_none(value: Any, convert_func: Callable[[str], Any]) -> Any | None:
+    def convert_or_none(value: Any, convert_func: Callable[[str], Any]) -> Any | None:
         try:
             return convert_func(value.strip())
         except (ValueError, TypeError, AttributeError):
             return None
 
     @staticmethod
-    def _find_node_index(
+    def find_node_index(
         package: Package,
         nodes: list[Node],
         kind: NodeKind,
@@ -262,10 +262,10 @@ class Package:
         return self.vehicle_requirement.id - 1 if self.vehicle_requirement else None
 
     def pickup_node_index(self, nodes: list[Node]) -> int | None:
-        return self._find_node_index(self, nodes, NodeKind.PICKUP)
+        return self.find_node_index(self, nodes, NodeKind.PICKUP)
 
     def delivery_node_index(self, nodes: list[Node]) -> int | None:
-        return self._find_node_index(self, nodes, NodeKind.DELIVERY)
+        return self.find_node_index(self, nodes, NodeKind.DELIVERY)
 
 
 class NodeKind(Enum):

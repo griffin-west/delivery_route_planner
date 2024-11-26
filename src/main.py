@@ -18,7 +18,7 @@ class _DeliveryRoutePlanner:
         self.navigation_manager = components.NavigationManager(
             page,
             self.data,
-            solution_callback=self._create_solution,
+            solution_callback=self.create_solution,
         )
         self.views = {
             "settings": views.SettingsView(
@@ -38,13 +38,13 @@ class _DeliveryRoutePlanner:
             "charts": views.ChartsView(page),
         }
         self.navigation_manager.set_views(self.views)
-        self._render_gui()
+        self.render_gui()
 
-    def _render_gui(self) -> None:
+    def render_gui(self) -> None:
         self.page.add(self.title_bar.render())
         self.page.add(self.navigation_manager.render())
 
-    def _create_solution(self) -> bool:
+    def create_solution(self) -> bool:
         try:
             solution = routing.solve_vehicle_routing_problem(self.data)
         except Exception as e:
@@ -62,9 +62,9 @@ class _DeliveryRoutePlanner:
             return True
 
 
-def _main(page: ft.Page) -> None:
+def main(page: ft.Page) -> None:
     _DeliveryRoutePlanner(page)
 
 
 if __name__ == "__main__":
-    ft.app(target=_main, assets_dir="delivery_route_planner/assets")
+    ft.app(target=main, assets_dir="delivery_route_planner/assets")

@@ -216,8 +216,8 @@ class SettingsView:
 
     def create_start_time_card(self) -> ft.Card:
 
-        def _start_time_change(_e: ft.ControlEvent) -> None:
-            def _update_time(e: ft.ControlEvent) -> None:
+        def start_time_change(_e: ft.ControlEvent) -> None:
+            def update_time(e: ft.ControlEvent) -> None:
                 self.data.scenario.day_start = models.RoutingTime.from_time(
                     e.control.value,
                 )
@@ -229,7 +229,7 @@ class SettingsView:
                 help_text="Choose a time earlier than 9 am "
                 "to ensure all packages are able to be delivered.",
                 value=self.data.scenario.day_start.time,
-                on_change=_update_time,
+                on_change=update_time,
             )
             self.page.open(time_picker)
 
@@ -249,7 +249,7 @@ class SettingsView:
         start_time_button = ft.Container(
             ft.ElevatedButton(
                 text="Select new time",
-                on_click=_start_time_change,
+                on_click=start_time_change,
             ),
             padding=ft.padding.only(0, 0, 20, 10),
         )

@@ -16,7 +16,7 @@ class TitleBar:
             height=30,
             icon_size=18,
             icon=ft.icons.KEYBOARD_ARROW_DOWN_ROUNDED,
-            on_click=self._minimize_window,
+            on_click=self.minimize_window,
             icon_color=ft.colors.ON_SURFACE,
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
@@ -25,7 +25,7 @@ class TitleBar:
             height=30,
             icon_size=18,
             icon=ft.icons.CROP_SQUARE_ROUNDED,
-            on_click=self._maximize_window,
+            on_click=self.maximize_window,
             icon_color=ft.colors.ON_SURFACE,
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(10)),
         )
@@ -59,10 +59,10 @@ class TitleBar:
             vertical_alignment=ft.CrossAxisAlignment.START,
         )
 
-    def _minimize_window(self, _e: ft.ControlEvent) -> None:
+    def minimize_window(self, _e: ft.ControlEvent) -> None:
         self.page.window.minimized = True
         self.page.update()
 
-    def _maximize_window(self, _e: ft.ControlEvent) -> None:
+    def maximize_window(self, _e: ft.ControlEvent) -> None:
         self.page.window.maximized = not self.page.window.maximized
         self.page.update()

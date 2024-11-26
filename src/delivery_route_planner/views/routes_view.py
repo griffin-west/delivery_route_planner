@@ -39,7 +39,7 @@ class RoutesView:
             padding=30,
         )
         body = ft.Column(
-            controls=[self._build_route_tables()],
+            controls=[self.build_route_tables()],
             scroll=ft.ScrollMode.AUTO,
             expand=True,
         )
@@ -52,7 +52,7 @@ class RoutesView:
     def set_solution(self, solution: models.Solution) -> None:
         self.solution = solution
 
-    def _build_route_tables(self) -> ft.Container:
+    def build_route_tables(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 

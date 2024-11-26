@@ -40,9 +40,9 @@ class ChartsView:
         )
         body = ft.Column(
             controls=[
-                self._build_pie_charts(),
-                self._build_bar_charts(),
-                self._build_line_chart(),
+                self.build_pie_charts(),
+                self.build_bar_charts(),
+                self.build_line_chart(),
                 ft.Container(),
             ],
             spacing=30,
@@ -58,7 +58,7 @@ class ChartsView:
     def set_solution(self, solution: models.Solution) -> None:
         self.solution = solution
 
-    def _build_pie_charts(self) -> ft.Container:
+    def build_pie_charts(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 
@@ -169,7 +169,7 @@ class ChartsView:
             padding=ft.padding.only(30, 0, 0, 0),
         )
 
-    def _build_bar_charts(self) -> ft.Container:
+    def build_bar_charts(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 
@@ -267,7 +267,7 @@ class ChartsView:
             padding=ft.padding.only(30, 0, 0, 0),
         )
 
-    def _build_line_chart(self) -> ft.Container:
+    def build_line_chart(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 

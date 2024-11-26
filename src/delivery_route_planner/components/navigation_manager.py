@@ -48,7 +48,7 @@ class NavigationManager:
         self.views = views
         self.view_names = list(views.keys())
         self.view_container.content = self.views["settings"].render()
-        self.navigation_rail = self._build_navigation_rail(views)
+        self.navigation_rail = self.build_navigation_rail(views)
 
     def navigate_from_view_name(self, name: str) -> None:
         for i, view_name in enumerate(self.view_names):
@@ -57,19 +57,19 @@ class NavigationManager:
                 self.view_container.content = self.views[view_name].render()
                 self.page.update()
 
-    def _navigate_from_selection(self, e: ft.ControlEvent) -> None:
+    def navigate_from_selection(self, e: ft.ControlEvent) -> None:
         selected_view_name = self.view_names[e.control.selected_index]
         self.view_container.content = self.views[selected_view_name].render()
         self.page.update()
 
-    def _build_navigation_rail(self, views: dict) -> ft.NavigationRail:
+    def build_navigation_rail(self, views: dict) -> ft.NavigationRail:
         solve_button = ft.FloatingActionButton(
             icon=ft.icons.AUTO_AWESOME_ROUNDED,
             bgcolor=ft.colors.PRIMARY,
             foreground_color=ft.colors.ON_PRIMARY,
             elevation=2,
             hover_elevation=4,
-            on_click=self._start_solver,
+            on_click=self.start_solver,
         )
         solve_button_container = ft.Container(
             ft.Column(
@@ -95,11 +95,11 @@ class NavigationManager:
             label_type=ft.NavigationRailLabelType.SELECTED,
             indicator_color=ft.colors.INVERSE_PRIMARY,
             bgcolor=ft.colors.TRANSPARENT,
-            on_change=self._navigate_from_selection,
+            on_change=self.navigate_from_selection,
         )
 
-    def _start_solver(self, _e: ft.ControlEvent) -> None:
-        solver_dialogs = self._build_solution_dialogs()
+    def start_solver(self, _e: ft.ControlEvent) -> None:
+        solver_dialogs = self.build_solution_dialogs()
 
         self.page.open(solver_dialogs.progress)
         solver_successful = self.solution_callback()
@@ -108,22 +108,22 @@ class NavigationManager:
         self.page.window.to_front()
         self.page.close(solver_dialogs.progress)
         if solver_successful:
-            self._enable_view("routes")
-            self._enable_view("validation")
-            self._enable_view("charts")
+            self.enable_view("routes")
+            self.enable_view("validation")
+            self.enable_view("charts")
             self.page.open(solver_dialogs.success)
         else:
             self.page.open(solver_dialogs.failure)
 
         self.page.update()
 
-    def _enable_view(self, name: str) -> None:
+    def enable_view(self, name: str) -> None:
         for i, view_name in enumerate(self.view_names):
             if view_name == name and self.navigation_rail.destinations:
                 self.navigation_rail.destinations[i].disabled = False
         self.page.update()
 
-    def _build_solution_dialogs(self) -> _SolutionDialogs:
+    def build_solution_dialogs(self) -> _SolutionDialogs:
         with Path(LOTTIE_FILE).open(encoding="utf-8") as lottie_file:
             json_data = lottie_file.read()
             json_base64 = base64.b64encode(json_data.encode("utf-8")).decode("utf-8")

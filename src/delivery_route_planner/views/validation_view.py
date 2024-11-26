@@ -39,7 +39,7 @@ class ValidationView:
             padding=30,
         )
         body = ft.Column(
-            controls=[self._build_validation_table()],
+            controls=[self.build_validation_table()],
             scroll=ft.ScrollMode.AUTO,
             expand=True,
         )
@@ -52,7 +52,7 @@ class ValidationView:
     def set_solution(self, solution: models.Solution) -> None:
         self.solution = solution
 
-    def _build_validation_table(self) -> ft.Container:
+    def build_validation_table(self) -> ft.Container:
         if not self.solution:
             return ft.Container()
 

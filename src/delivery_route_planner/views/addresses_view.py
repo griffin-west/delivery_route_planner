@@ -39,7 +39,7 @@ class AddressesView:
             padding=30,
         )
         body = ft.Column(
-            controls=[self._build_address_table()],
+            controls=[self.build_address_table()],
             expand=True,
             scroll=ft.ScrollMode.AUTO,
         )
@@ -49,7 +49,7 @@ class AddressesView:
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
         )
 
-    def _build_address_table(self) -> ft.Container:
+    def build_address_table(self) -> ft.Container:
         address_rows = []
         address_table = ft.DataTable(
             columns=[

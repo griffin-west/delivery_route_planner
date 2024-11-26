@@ -4,9 +4,9 @@ import flet as ft
 class WindowManager:
     def __init__(self, page: ft.Page) -> None:
         self.page = page
-        self._setup_window()
+        self.setup_window()
 
-    def _setup_window(self) -> None:
+    def setup_window(self) -> None:
         close_alert = ft.AlertDialog(
             modal=True,
             icon=ft.Icon(ft.icons.EXIT_TO_APP_ROUNDED),
@@ -31,7 +31,7 @@ class WindowManager:
             ],
         )
 
-        def _window_event_handler(e: ft.WindowEvent) -> None:
+        def window_event_handler(e: ft.WindowEvent) -> None:
             if e.type == ft.WindowEventType.CLOSE:
                 self.page.open(close_alert)
             self.page.update()
@@ -44,7 +44,7 @@ class WindowManager:
         self.page.window.shadow = True
         self.page.window.prevent_close = self.page.platform != ft.PagePlatform.WINDOWS
         self.page.window.title_bar_hidden = True
-        self.page.window.on_event = _window_event_handler
+        self.page.window.on_event = window_event_handler
         self.page.padding = 0
         self.page.spacing = 0
         self.page.window.center()
