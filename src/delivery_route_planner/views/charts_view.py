@@ -208,7 +208,8 @@ class ChartsView:
                     and this_stop.node.address == next_stop.node.address
                 ):
                     continue
-                bars.append(ft.BarChartGroup(
+                bars.append(
+                    ft.BarChartGroup(
                         x=step,
                         bar_rods=[
                             ft.BarChartRod(
@@ -325,18 +326,21 @@ class ChartsView:
                     ft.ChartAxisLabel(
                         value=i,
                         label=ft.Text(models.RoutingTime.from_seconds(i).short_str),
-                    ) for i in range(
+                    )
+                    for i in range(
                         self.solution.data.scenario.day_start.seconds,
                         self.solution.end_time.seconds,
                         1800,
-                        )
+                    )
                 ],
             ),
             width=1200,
             tooltip_bgcolor=ft.colors.SURFACE,
             horizontal_grid_lines=ft.ChartGridLines(10),
             vertical_grid_lines=ft.ChartGridLines(900),
-            max_y=round((max(route.mileage for route in self.solution.routes) * 1.1), 0),
+            max_y=round(
+                (max(route.mileage for route in self.solution.routes) * 1.1), 0
+            ),
         )
 
         vehicle_labels = ft.Column(
@@ -353,7 +357,8 @@ class ChartsView:
                         )
                     ),
                     font_family="Outfit-Bold",
-                ) for route in self.solution.routes
+                )
+                for route in self.solution.routes
             ],
         )
 

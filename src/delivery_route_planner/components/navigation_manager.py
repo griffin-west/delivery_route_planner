@@ -9,7 +9,7 @@ from delivery_route_planner.models import models
 LOTTIE_FILE = "src/delivery_route_planner/assets/animations/routing-loading.json"
 
 
-class SolutionDialogs(NamedTuple):
+class _SolutionDialogs(NamedTuple):
     progress: ft.AlertDialog
     success: ft.AlertDialog
     failure: ft.AlertDialog
@@ -69,7 +69,7 @@ class NavigationManager:
             foreground_color=ft.colors.ON_PRIMARY,
             elevation=2,
             hover_elevation=4,
-            on_click=self.start_solver,
+            on_click=self._start_solver,
         )
         solve_button_container = ft.Container(
             ft.Column(
@@ -98,7 +98,7 @@ class NavigationManager:
             on_change=self._navigate_from_selection,
         )
 
-    def start_solver(self, _e: ft.ControlEvent) -> None:
+    def _start_solver(self, _e: ft.ControlEvent) -> None:
         solver_dialogs = self._build_solution_dialogs()
 
         self.page.open(solver_dialogs.progress)
@@ -123,7 +123,7 @@ class NavigationManager:
                 self.navigation_rail.destinations[i].disabled = False
         self.page.update()
 
-    def _build_solution_dialogs(self) -> SolutionDialogs:
+    def _build_solution_dialogs(self) -> _SolutionDialogs:
         with Path(LOTTIE_FILE).open(encoding="utf-8") as lottie_file:
             json_data = lottie_file.read()
             json_base64 = base64.b64encode(json_data.encode("utf-8")).decode("utf-8")
@@ -174,7 +174,7 @@ class NavigationManager:
             ],
             actions_alignment=ft.MainAxisAlignment.END,
         )
-        return SolutionDialogs(
+        return _SolutionDialogs(
             solver_progress_dialog,
             solver_success_dialog,
             solver_failure_dialog,

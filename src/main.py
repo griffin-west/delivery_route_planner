@@ -7,18 +7,18 @@ from delivery_route_planner.models import models
 from delivery_route_planner.routing import routing
 
 
-class DeliveryRoutePlanner:
+class _DeliveryRoutePlanner:
+
     def __init__(self, page: ft.Page) -> None:
         self.page = page
         self.data = models.DataModel.with_defaults()
         self.solution = None
-
         self.window_manager = components.WindowManager(page)
         self.title_bar = components.TitleBar(page)
         self.navigation_manager = components.NavigationManager(
             page,
             self.data,
-            solution_callback=self.create_solution,
+            solution_callback=self._create_solution,
         )
         self.views = {
             "settings": views.SettingsView(
@@ -37,16 +37,14 @@ class DeliveryRoutePlanner:
             "validation": views.ValidationView(page),
             "charts": views.ChartsView(page),
         }
-
         self.navigation_manager.set_views(self.views)
-
         self._render_gui()
 
     def _render_gui(self) -> None:
         self.page.add(self.title_bar.render())
         self.page.add(self.navigation_manager.render())
 
-    def create_solution(self) -> bool:
+    def _create_solution(self) -> bool:
         try:
             solution = routing.solve_vehicle_routing_problem(self.data)
         except Exception as e:
@@ -64,9 +62,9 @@ class DeliveryRoutePlanner:
             return True
 
 
-def main(page: ft.Page) -> None:
-    DeliveryRoutePlanner(page)
+def _main(page: ft.Page) -> None:
+    _DeliveryRoutePlanner(page)
 
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="delivery_route_planner/assets")
+    ft.app(target=_main, assets_dir="delivery_route_planner/assets")

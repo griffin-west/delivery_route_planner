@@ -52,8 +52,6 @@ class WindowManager:
         self.page.fonts = {
             "Outfit": "fonts/Outfit-Regular.ttf",
             "Outfit-Bold": "fonts/Outfit-Bold.ttf",
-            "Roboto": "fonts/Roboto-Regular.ttf",
-            "Roboto Serif": "fonts/RobotoSerif-Regular.ttf",
         }
         self.page.theme = ft.Theme(font_family="Outfit")
         self.page.bgcolor = ft.colors.ON_INVERSE_SURFACE
