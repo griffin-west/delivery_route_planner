@@ -7,6 +7,11 @@ class WindowManager:
         self.setup_window()
 
     def setup_window(self) -> None:
+
+        def close_app(_e: ft.ControlEvent) -> None:
+            self.page.window.prevent_close = False
+            self.page.window.close()
+
         close_alert = ft.AlertDialog(
             modal=True,
             icon=ft.Icon(ft.icons.EXIT_TO_APP_ROUNDED),
@@ -26,7 +31,7 @@ class WindowManager:
                 ),
                 ft.FilledTonalButton(
                     "Exit",
-                    on_click=lambda _: self.page.window.destroy(),
+                    on_click=close_app,
                 ),
             ],
         )
@@ -42,7 +47,7 @@ class WindowManager:
         self.page.window.min_width = 600
         self.page.window.min_height = 600
         self.page.window.shadow = True
-        self.page.window.prevent_close = self.page.platform != ft.PagePlatform.WINDOWS
+        self.page.window.prevent_close = True
         self.page.window.title_bar_hidden = True
         self.page.window.on_event = window_event_handler
         self.page.padding = 0
