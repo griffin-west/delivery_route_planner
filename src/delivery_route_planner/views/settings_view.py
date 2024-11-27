@@ -336,7 +336,7 @@ class SettingsView:
             leading=ft.Icon(ft.icons.REFRESH_ROUNDED),
             title=ft.Text("Solution limit"),
             subtitle=ft.Text(
-                "Solutions are iterated very rapidly to optimize the results.",
+                "Solutions are iterated very rapidly to optimize results.",
             ),
             trailing=solution_limit_callout,
         )
@@ -366,8 +366,8 @@ class SettingsView:
             leading=ft.Icon(ft.icons.TERMINAL_ROUNDED),
             title=ft.Text("OR-Tools search logging"),
             subtitle=ft.Text(
-                "This will open the terminal to display detailed logging "
-                "output from OR-Tools while the solver is running.",
+                "This will show detailed logging from OR-Tools, "
+                "displayed as STDOUT in the terminal.",
             ),
         )
         logging_switch = ft.Container(

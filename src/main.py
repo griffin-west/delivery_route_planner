@@ -7,7 +7,7 @@ from delivery_route_planner.models import models
 from delivery_route_planner.routing import routing
 
 
-class _DeliveryRoutePlanner:
+class DeliveryRoutePlanner:
 
     def __init__(self, page: ft.Page) -> None:
         self.page = page
@@ -63,7 +63,7 @@ class _DeliveryRoutePlanner:
 
 
 def main(page: ft.Page) -> None:
-    _DeliveryRoutePlanner(page)
+    DeliveryRoutePlanner(page)
 
 
 if __name__ == "__main__":
