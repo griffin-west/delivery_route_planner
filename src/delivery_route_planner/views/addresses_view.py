@@ -53,6 +53,7 @@ class AddressesView:
         address_rows = []
         address_table = ft.DataTable(
             columns=[
+                ft.DataColumn(label=ft.Text("Name")),
                 ft.DataColumn(label=ft.Text("Street")),
                 ft.DataColumn(label=ft.Text("City")),
                 ft.DataColumn(label=ft.Text("State")),
@@ -73,10 +74,8 @@ class AddressesView:
         address_rows.extend(
             ft.DataRow(
                 cells=[
-                    ft.DataCell(
-                        ft.Text(address.street),
-                        placeholder=address.street == "Depot",
-                    ),
+                    ft.DataCell(ft.Text(address.name)),
+                    ft.DataCell(ft.Text(address.street)),
                     ft.DataCell(ft.Text(address.city)),
                     ft.DataCell(ft.Text(address.state)),
                     ft.DataCell(ft.Text(address.zip_code)),

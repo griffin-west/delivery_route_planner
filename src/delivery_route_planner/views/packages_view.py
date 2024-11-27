@@ -55,6 +55,7 @@ class PackagesView:
         package_table = ft.DataTable(
             columns=[
                 ft.DataColumn(label=ft.Text("Package ID"), numeric=True),
+                ft.DataColumn(label=ft.Text("Recipient")),
                 ft.DataColumn(label=ft.Text("Address")),
                 ft.DataColumn(label=ft.Text("Weight (kg)"), numeric=True),
                 ft.DataColumn(label=ft.Text("Availability")),
@@ -87,6 +88,7 @@ class PackagesView:
                 ft.DataRow(
                     cells=[
                         ft.DataCell(ft.Text(str(package.id))),
+                        ft.DataCell(ft.Text(package.address.name)),
                         ft.DataCell(ft.Text(package.address.street)),
                         ft.DataCell(ft.Text(str(package.weight_kg))),
                         ft.DataCell(

@@ -14,6 +14,7 @@ FSS = routing_enums_pb2.FirstSolutionStrategy
 LSM = routing_enums_pb2.LocalSearchMetaheuristic
 ADDRESS_FILE = "src/delivery_route_planner/data/distance_matrix.csv"
 PACKAGE_FILE = "src/delivery_route_planner/data/package_details.csv"
+DEPOT_ADDRESS = "4001 South 700 East"
 MILEAGE_SCALE_FACTOR = 10
 SECONDS_PER_HOUR = 3600
 SECONDS_PER_DAY = SECONDS_PER_HOUR * 24
@@ -28,6 +29,7 @@ CsvRow: TypeAlias = dict[str, str]
 
 @dataclass
 class Address:
+    name: str
     street: str
     city: str
     state: str
@@ -39,6 +41,7 @@ class Address:
         with Path(ADDRESS_FILE).open(newline="", encoding="utf-8-sig") as file:
             return {
                 row["Street"]: cls(
+                    name=row.pop("Name"),
                     street=row.pop("Street"),
                     city=row.pop("City"),
                     state=row.pop("State"),
@@ -287,9 +290,9 @@ class Node:
 
     @classmethod
     def from_packages(cls, packages: PackageDict) -> list[Node]:
-        nodes: list[Node] = [cls(NodeKind.ORIGIN, "Depot")]
+        nodes: list[Node] = [cls(NodeKind.ORIGIN, DEPOT_ADDRESS)]
         for package in packages.values():
-            nodes.append(cls(NodeKind.PICKUP, "Depot", package))
+            nodes.append(cls(NodeKind.PICKUP, DEPOT_ADDRESS, package))
             nodes.append(cls(NodeKind.DELIVERY, package.address.street, package))
         return nodes
 
