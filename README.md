@@ -18,6 +18,8 @@ The application provides an intuitive graphical interface for managing delivery 
 - Comprehensive route validation and constraint verification
 - Configurable solver settings for optimization control
 
+![alt text](src/delivery_route_planner/assets/images/screenshot_1.png)
+
 ## Technology Stack
 
 - Python 3.12.7
@@ -80,6 +82,8 @@ The application provides several interfaces for managing delivery routes:
   - Distance calculations between locations
   - Total mileage optimization results
 
+  ![alt text](src/delivery_route_planner/assets/images/screenshot_2.png)
+
 ### Validation
 - Verify constraint satisfaction:
   - Delivery deadline compliance
@@ -94,6 +98,8 @@ The application provides several interfaces for managing delivery routes:
   - Package load progression
   - Mileage accumulation over time
   - Comparative vehicle statistics
+
+  ![alt text](src/delivery_route_planner/assets/images/screenshot_3.png)
 
 ## Performance
 
